@@ -1,0 +1,19 @@
+{
+  "name": "elimination-template",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "matter-js": "^0.20.0",
+    "pixi.js": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/matter-js": "^0.20.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}

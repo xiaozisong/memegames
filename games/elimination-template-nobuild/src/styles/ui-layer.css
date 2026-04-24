@@ -1,0 +1,3 @@
+/* Legacy placeholder stylesheet.
+   Current no-build runtime keeps most shell/media styles inline in the active Pixi renderer.
+   Use this file only when you intentionally extract shared DOM styles out of the renderer. */

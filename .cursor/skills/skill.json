@@ -1,0 +1,194 @@
+{
+    "version": "1.0",
+    "description": "AI Mini Game Generation Skills",
+    "skills": [
+      {
+        "name": "canvas_game_core",
+        "category": "engine",
+        "description": "基础 Canvas 游戏循环与渲染系统",
+        "capabilities": [
+          "requestAnimationFrame game loop",
+          "2D rendering (rect, arc, image)",
+          "camera transform (camX, camY)",
+          "layered rendering"
+        ],
+        "use_when": [
+          "lightweight games",
+          "AI generated iframe games",
+          "no complex 3D required"
+        ]
+      },
+      {
+        "name": "simple_physics",
+        "category": "physics",
+        "description": "简化物理系统（适用于绝大多数小游戏）",
+        "capabilities": [
+          "velocity vx vy",
+          "gravity",
+          "drag",
+          "parabolic motion",
+          "collision detection (AABB / circle)"
+        ],
+        "use_when": [
+          "flappy-like",
+          "runner games",
+          "launch mechanics"
+        ]
+      },
+      {
+        "name": "tap_rhythm_system",
+        "category": "gameplay",
+        "description": "节奏点击驱动系统",
+        "capabilities": [
+          "tap frequency detection",
+          "combo system",
+          "tap to speed conversion",
+          "input window timing"
+        ],
+        "use_when": [
+          "click/tap based games",
+          "sports simulation",
+          "QTE style gameplay"
+        ]
+      },
+      {
+        "name": "procedural_generation",
+        "category": "system",
+        "description": "程序生成系统",
+        "capabilities": [
+          "random generation",
+          "seeded RNG",
+          "infinite level extension",
+          "difficulty scaling"
+        ],
+        "use_when": [
+          "endless runner",
+          "auto-generated levels",
+          "dynamic obstacles"
+        ]
+      },
+      {
+        "name": "game_state_machine",
+        "category": "architecture",
+        "description": "游戏状态管理",
+        "capabilities": [
+          "phase control (start, play, end)",
+          "state transitions",
+          "UI synchronization"
+        ],
+        "use_when": [
+          "any game"
+        ]
+      },
+      {
+        "name": "particle_system",
+        "category": "effects",
+        "description": "轻量粒子系统",
+        "capabilities": [
+          "explosion particles",
+          "trail effects",
+          "life-based animation"
+        ],
+        "use_when": [
+          "feedback effects",
+          "hit / click animations"
+        ]
+      },
+      {
+        "name": "camera_follow",
+        "category": "system",
+        "description": "摄像机跟随系统",
+        "capabilities": [
+          "lerp following",
+          "look ahead",
+          "zoom control"
+        ],
+        "use_when": [
+          "runner games",
+          "scrolling worlds"
+        ]
+      },
+      {
+        "name": "threejs_core",
+        "category": "engine",
+        "description": "Three.js 3D 游戏基础",
+        "capabilities": [
+          "scene setup",
+          "camera",
+          "renderer",
+          "basic mesh",
+          "lighting"
+        ],
+        "use_when": [
+          "3D games",
+          "need depth",
+          "camera perspective"
+        ]
+      },
+      {
+        "name": "post_processing_shader",
+        "category": "effects",
+        "description": "后处理视觉效果",
+        "capabilities": [
+          "pixelation",
+          "chromatic aberration",
+          "blur",
+          "CRT effect"
+        ],
+        "use_when": [
+          "visual polish",
+          "retro style",
+          "high-end UI feel"
+        ]
+      },
+      {
+        "name": "modern_ui",
+        "category": "ui",
+        "description": "现代游戏UI系统",
+        "capabilities": [
+          "rounded corners",
+          "glassmorphism",
+          "gradients",
+          "cards",
+          "shadows"
+        ],
+        "use_when": [
+          "any UI layer"
+        ]
+      },
+      {
+        "name": "ui_animation",
+        "category": "ui",
+        "description": "UI动画系统",
+        "capabilities": [
+          "fade in/out",
+          "scale animation",
+          "transition",
+          "transform"
+        ],
+        "use_when": [
+          "modals",
+          "notifications",
+          "feedback"
+        ]
+      },
+      {
+        "name": "device_adaptation",
+        "category": "ui",
+        "description": "设备适配与响应式布局优化",
+        "capabilities": [
+          "responsive breakpoints",
+          "safe area support",
+          "orientation handling",
+          "touch target optimization",
+          "overflow prevention"
+        ],
+        "use_when": [
+          "mobile layout issues",
+          "tablet/desktop adaptation",
+          "viewport overflow",
+          "notch and safe-area fixes"
+        ]
+      }
+    ]
+  }

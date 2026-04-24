@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shooter Mini Play</title>
+    <style>
+      html, body, canvas {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #080b16;
+      }
+      #tip {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        color: #e6edf3;
+        font: 14px Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tip">点击任意位置发射子弹</div>
+    <canvas id="cv"></canvas>
+    <script>
+      const cv = document.getElementById("cv");
+      const ctx = cv.getContext("2d");
+      const bullets = [];
+      const player = { x: 0, y: 0 };
+
+      function resize() {
+        cv.width = window.innerWidth;
+        cv.height = window.innerHeight;
+        player.x = cv.width / 2;
+        player.y = cv.height - 40;
+      }
+
+      function shoot(x, y) {
+        const dx = x - player.x;
+        const dy = y - player.y;
+        const len = Math.hypot(dx, dy) || 1;
+        bullets.push({
+          x: player.x,
+          y: player.y,
+          vx: (dx / len) * 6,
+          vy: (dy / len) * 6
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        ctx.fillStyle = "#5af78e";
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y - 18);
+        ctx.lineTo(player.x - 14, player.y + 14);
+        ctx.lineTo(player.x + 14, player.y + 14);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#ffe066";
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          b.x += b.vx;
+          b.y += b.vy;
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+          if (b.x < -20 || b.y < -20 || b.x > cv.width + 20 || b.y > cv.height + 20) {
+            bullets.splice(i, 1);
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener("resize", resize);
+      cv.addEventListener("click", (event) => {
+        const rect = cv.getBoundingClientRect();
+        shoot(event.clientX - rect.left, event.clientY - rect.top);
+      });
+
+      resize();
+      draw();
+    </script>
+  </body>
+</html>

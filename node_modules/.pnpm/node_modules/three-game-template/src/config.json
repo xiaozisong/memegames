@@ -1,0 +1,33 @@
+{
+  "_meta": {
+    "name": "Three Game Template Config",
+    "description": "Tunable params for Pixi visual template game"
+  },
+  "theme": {
+    "colors": {
+      "background": { "value": "#020617" },
+      "primary": { "value": "#38bdf8" },
+      "accent": { "value": "#a78bfa" },
+      "text": { "value": "#e2e8f0" }
+    }
+  },
+  "gameplay": {
+    "params": {
+      "rotationSpeedX": { "value": 0.9 },
+      "rotationSpeedY": { "value": 1.2 },
+      "bounceAmplitude": { "value": 0.2 },
+      "bounceFrequency": { "value": 2.8 },
+      "pulseDecay": { "value": 2.2 },
+      "baseScale": { "value": 1.0 },
+      "baseGlowAlpha": { "value": 0.26 },
+      "targetScore": { "value": 200 },
+      "orbRadius": { "value": 74 },
+      "centerYOffset": { "value": 24 }
+    }
+  },
+  "layout": {
+    "maxPanelWidth": { "value": 620 },
+    "maxPanelHeight": { "value": 860 },
+    "hudInset": { "value": 16 }
+  }
+}

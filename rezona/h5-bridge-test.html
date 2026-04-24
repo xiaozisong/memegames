@@ -1,0 +1,697 @@
+<!--
+/**
+ * [INPUT]: 依赖 window.webkit.messageHandlers.rezonaBridge、Web APIs(DeviceOrientation/getUserMedia) 与 DOM/Promise。
+ * [OUTPUT]: 提供 vibrate/getUsername/getClientInfo/motion/camera+mic 的手动测试 UI 与桥接样例。
+ * [POS]: appProtocol 的桥接测试页，覆盖 RezonaBridge/体感/相机+麦克风的完整回归路径。
+ * [PROTOCOL]: 变更时更新此头部，然后检查 AGENTS.md
+ */
+-->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>H5 Bridge Test</title>
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 24px 16px 32px;
+            padding-top: calc(24px + env(safe-area-inset-top));
+            padding-bottom: calc(32px + env(safe-area-inset-bottom));
+            background: radial-gradient(circle at top, #2f2f2f, #0b0b0b 70%);
+            color: #f5f5f5;
+            font-family: "SF Pro Text", "SF Pro Display", -apple-system, system-ui, sans-serif;
+        }
+
+        .card {
+            width: min(520px, 92vw);
+            padding: 28px 26px 24px;
+            border-radius: 20px;
+            background: rgba(24, 24, 24, 0.9);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+            text-align: left;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        p {
+            margin: 0 0 16px;
+            color: #c9c9c9;
+            font-size: 14px;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        section {
+            padding: 14px 0 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        section:first-of-type {
+            border-top: none;
+            padding-top: 8px;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #9b9b9b;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .row.vibrate-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .row.vibrate-row button {
+            width: 100%;
+            padding: 0 6px;
+            font-size: 12px;
+        }
+
+        .mini-title {
+            margin: 0 0 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #b5b5b5;
+        }
+
+        button {
+            flex: 1 1 160px;
+            height: 42px;
+            border: none;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #121212;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .secondary {
+            background: #2c2c2c;
+            color: #f5f5f5;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .ghost {
+            background: transparent;
+            color: #f5f5f5;
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .meta {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+
+        #status {
+            margin-top: 8px;
+        }
+
+        .value {
+            font-size: 13px;
+            color: #e4e4e4;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 14px;
+        }
+
+        .split section {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .row.two-col {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .ball-stage {
+            height: 160px;
+            margin-top: 10px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08), rgba(10, 10, 10, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ball {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            background: #ffd166;
+            box-shadow: 0 0 12px rgba(255, 209, 102, 0.6);
+            transform: translate(-50%, -50%) translate(var(--x, 0px), var(--y, 0px));
+            transition: transform 0.08s ease-out;
+        }
+
+        .ball-readout {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            font-size: 12px;
+            color: #cfcfcf;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .ball-readout .label {
+            color: #9b9b9b;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+
+        .ball-readout .value {
+            font-size: 12px;
+            color: #e8e8e8;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 12px;
+            background: #0d0d0d;
+            margin-top: 10px;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .mic-metrics {
+            margin-top: 8px;
+            display: grid;
+            gap: 4px;
+        }
+
+        .mic-metric {
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 12px;
+            color: #d6d6d6;
+        }
+
+        pre {
+            margin: 10px 0 0;
+            padding: 10px;
+            background: #121212;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 12px;
+            color: #d0d0d0;
+            max-height: 120px;
+            overflow: auto;
+        }
+
+        @media (max-width: 380px) {
+            .card {
+                padding: 24px 18px 20px;
+            }
+
+            .row {
+                gap: 6px;
+            }
+
+            .split {
+                gap: 10px;
+            }
+
+            button {
+                height: 38px;
+                font-size: 12px;
+                border-radius: 10px;
+            }
+
+            .row.vibrate-row button {
+                font-size: 11px;
+                padding: 0 4px;
+            }
+
+            h2 {
+                font-size: 13px;
+            }
+
+            .ball-stage,
+            video {
+                height: 140px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .row.vibrate-row {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <h1>H5 Bridge Test</h1>
+        <p>完整覆盖 Bridge / Motion / Camera + Mic 的手动回归页。</p>
+
+        <section>
+            <h2>Bridge</h2>
+            <div class="mini-title">Vibrate Strength</div>
+            <div class="row vibrate-row">
+                <button id="vibrate-light" type="button">Light</button>
+                <button id="vibrate-medium" type="button">Medium</button>
+                <button id="vibrate-heavy" type="button">Heavy</button>
+            </div>
+            <div class="row">
+                <button id="username-button" class="secondary" type="button">Get Username</button>
+                <button id="client-info-button" class="secondary" type="button">Get Client Info</button>
+                <button id="ping-button" class="ghost" type="button">Ping Bridge</button>
+            </div>
+            <div class="meta" id="bridge-status">Bridge: unknown</div>
+            <div class="meta" id="status">Idle</div>
+            <div class="meta" id="username">Username: -</div>
+            <div class="meta value" id="client-info">Client Info: -</div>
+        </section>
+
+        <div class="split">
+            <section>
+                <h2>Motion</h2>
+                <div class="row two-col">
+                    <button id="motion-enable" type="button">Enable Motion</button>
+                    <button id="motion-disable" class="secondary" type="button">Disable Motion</button>
+                </div>
+                <div class="ball-stage" id="motion-stage">
+                    <div class="ball" id="motion-ball"></div>
+                    <div class="ball-readout">
+                        <div class="label">alpha / beta / gamma</div>
+                        <div class="value" id="motion-values">- / - / -</div>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Camera + Mic</h2>
+                <div class="row two-col">
+                    <button id="camera-start" type="button">Start Cam + Mic</button>
+                    <button id="camera-stop" class="secondary" type="button">Stop Cam + Mic</button>
+                </div>
+                <video id="camera-preview" autoplay playsinline muted></video>
+                <div class="mic-metrics">
+                    <div class="mic-metric" id="mic-level">Mic level: 0.000</div>
+                    <div class="mic-metric" id="mic-freq">Peak freq: -</div>
+                </div>
+            </section>
+        </div>
+
+        <section>
+            <h2>Log</h2>
+            <pre id="log">Ready.</pre>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            var statusEl = document.getElementById('status');
+            var usernameEl = document.getElementById('username');
+            var bridgeStatusEl = document.getElementById('bridge-status');
+            var vibrateLightButton = document.getElementById('vibrate-light');
+            var vibrateMediumButton = document.getElementById('vibrate-medium');
+            var vibrateHeavyButton = document.getElementById('vibrate-heavy');
+            var usernameButton = document.getElementById('username-button');
+            var clientInfoButton = document.getElementById('client-info-button');
+            var pingButton = document.getElementById('ping-button');
+            var clientInfoEl = document.getElementById('client-info');
+            var motionEnableButton = document.getElementById('motion-enable');
+            var motionDisableButton = document.getElementById('motion-disable');
+            var motionValuesEl = document.getElementById('motion-values');
+            var motionStageEl = document.getElementById('motion-stage');
+            var motionBallEl = document.getElementById('motion-ball');
+            var cameraStartButton = document.getElementById('camera-start');
+            var cameraStopButton = document.getElementById('camera-stop');
+            var cameraPreview = document.getElementById('camera-preview');
+            var micLevelEl = document.getElementById('mic-level');
+            var micFreqEl = document.getElementById('mic-freq');
+            var logEl = document.getElementById('log');
+
+            var callbacks = new Map();
+            var motionListening = false;
+            var motionHandler = null;
+            var cameraStream = null;
+            var audioCtx = null;
+            var analyser = null;
+            var micRafId = null;
+
+            function makeRequestId() {
+                return 'h5-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+            }
+
+            function postMessage(payload) {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.rezonaBridge) {
+                    window.webkit.messageHandlers.rezonaBridge.postMessage(payload);
+                    return true;
+                }
+                return false;
+            }
+
+            function callNative(action, params) {
+                var requestId = makeRequestId();
+                var payload = {
+                    action: action,
+                    requestId: requestId,
+                    version: '1.0',
+                    params: params || {}
+                };
+
+                return new Promise(function (resolve, reject) {
+                    callbacks.set(requestId, { resolve: resolve, reject: reject });
+                    var ok = postMessage(payload);
+                    if (!ok) {
+                        callbacks.delete(requestId);
+                        reject({ code: -1, message: 'Bridge not available' });
+                    }
+                });
+            }
+
+            function log(message) {
+                var now = new Date();
+                var stamp = now.toLocaleTimeString();
+                logEl.textContent = '[' + stamp + '] ' + message + '\n' + logEl.textContent;
+            }
+
+            /* ========== Bridge 相关 ========== */
+            window.RezonaBridge = {
+                onNativeResponse: function (resp) {
+                    if (!resp || !resp.requestId) {
+                        statusEl.textContent = 'Invalid response';
+                        log('Invalid response from native.');
+                        return;
+                    }
+                    var cb = callbacks.get(resp.requestId);
+                    if (!cb) {
+                        statusEl.textContent = 'No callback for ' + resp.requestId;
+                        log('No callback: ' + resp.requestId);
+                        return;
+                    }
+                    callbacks.delete(resp.requestId);
+                    if (resp.code === 0) {
+                        cb.resolve(resp);
+                        log('Success: ' + resp.requestId);
+                    } else {
+                        cb.reject(resp);
+                        log('Fail: ' + resp.requestId + ' code=' + resp.code);
+                    }
+                }
+            };
+
+            function updateBridgeStatus() {
+                var ok = !!(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.rezonaBridge);
+                bridgeStatusEl.textContent = 'Bridge: ' + (ok ? 'available' : 'missing');
+                return ok;
+            }
+
+            function safeCallNative(action, params) {
+                var ok = updateBridgeStatus();
+                if (!ok) {
+                    statusEl.textContent = 'Bridge not available';
+                    log('Bridge missing for action: ' + action);
+                    return Promise.reject({ code: -1, message: 'Bridge not available' });
+                }
+                return callNative(action, params);
+            }
+
+            function bindVibrate(buttonEl, style) {
+                buttonEl.addEventListener('click', function () {
+                    statusEl.textContent = 'Sending vibrate...';
+                    safeCallNative('vibrate', { style: style })
+                        .then(function () {
+                            statusEl.textContent = 'Vibrate success';
+                            log('Vibrate ok: ' + style);
+                        })
+                        .catch(function (err) {
+                            var message = (err && err.message) ? err.message : 'Unknown error';
+                            statusEl.textContent = 'Vibrate failed: ' + message;
+                            log('Vibrate fail: ' + message);
+                        });
+                });
+            }
+
+            bindVibrate(vibrateLightButton, 'light');
+            bindVibrate(vibrateMediumButton, 'medium');
+            bindVibrate(vibrateHeavyButton, 'heavy');
+
+            usernameButton.addEventListener('click', function () {
+                statusEl.textContent = 'Requesting username...';
+                safeCallNative('getUsername')
+                    .then(function (resp) {
+                        var name = (resp && resp.data && typeof resp.data.username === 'string') ? resp.data.username : '';
+                        usernameEl.textContent = 'Username: ' + (name || '(empty)');
+                        statusEl.textContent = 'Username received';
+                        log('Username: ' + (name || '(empty)'));
+                    })
+                    .catch(function (err) {
+                        var message = (err && err.message) ? err.message : 'Unknown error';
+                        statusEl.textContent = 'Get username failed: ' + message;
+                        log('Username fail: ' + message);
+                    });
+            });
+
+            clientInfoButton.addEventListener('click', function () {
+                statusEl.textContent = 'Requesting client info...';
+                safeCallNative('getClientInfo')
+                    .then(function (resp) {
+                        var data = (resp && resp.data) ? resp.data : {};
+                        clientInfoEl.textContent = 'Client Info: ' + JSON.stringify(data);
+                        statusEl.textContent = 'Client info received';
+                        log('Client info: ' + JSON.stringify(data));
+                    })
+                    .catch(function (err) {
+                        var message = (err && err.message) ? err.message : 'Unknown error';
+                        statusEl.textContent = 'Get client info failed: ' + message;
+                        log('Client info fail: ' + message);
+                    });
+            });
+
+            pingButton.addEventListener('click', function () {
+                statusEl.textContent = 'Pinging bridge...';
+                safeCallNative('ping')
+                    .then(function () {
+                        statusEl.textContent = 'Bridge ping ok';
+                        log('Ping ok');
+                    })
+                    .catch(function (err) {
+                        var message = (err && err.message) ? err.message : 'Unknown error';
+                        statusEl.textContent = 'Ping failed: ' + message;
+                        log('Ping fail: ' + message);
+                    });
+            });
+
+            /* ========== Motion 相关 ========== */
+            function setBallOffset(x, y) {
+                if (!motionBallEl) {
+                    return;
+                }
+                motionBallEl.style.setProperty('--x', x + 'px');
+                motionBallEl.style.setProperty('--y', y + 'px');
+            }
+
+            function updateMotionBall(beta, gamma) {
+                if (!motionStageEl || !motionBallEl) {
+                    return;
+                }
+                var rect = motionStageEl.getBoundingClientRect();
+                var radius = motionBallEl.offsetWidth / 2;
+                var maxX = Math.max(0, rect.width / 2 - radius);
+                var maxY = Math.max(0, rect.height / 2 - radius);
+                var normX = Math.max(-1, Math.min(1, gamma / 45));
+                var normY = Math.max(-1, Math.min(1, beta / 45));
+                setBallOffset(normX * maxX, normY * maxY);
+            }
+
+            function onOrientation(e) {
+                if (e == null || e.alpha == null) {
+                    motionValuesEl.textContent = '- / - / -';
+                    setBallOffset(0, 0);
+                    return;
+                }
+                var alpha = e.alpha.toFixed(1);
+                var beta = e.beta.toFixed(1);
+                var gamma = e.gamma.toFixed(1);
+                motionValuesEl.textContent = alpha + ' / ' + beta + ' / ' + gamma;
+                updateMotionBall(e.beta, e.gamma);
+            }
+
+            function startMotion() {
+                if (motionListening) {
+                    return;
+                }
+                motionHandler = onOrientation;
+                window.addEventListener('deviceorientation', motionHandler);
+                motionListening = true;
+                log('Motion enabled.');
+            }
+
+            function stopMotion() {
+                if (!motionListening) {
+                    return;
+                }
+                window.removeEventListener('deviceorientation', motionHandler);
+                motionListening = false;
+                motionValuesEl.textContent = '- / - / -';
+                setBallOffset(0, 0);
+                log('Motion disabled.');
+            }
+
+            motionEnableButton.addEventListener('click', function () {
+                if (typeof DeviceOrientationEvent !== 'undefined' &&
+                    typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(function (res) {
+                            if (res === 'granted') {
+                                startMotion();
+                            } else {
+                                log('Motion permission denied: ' + res);
+                            }
+                        })
+                        .catch(function () {
+                            log('Motion permission request failed.');
+                        });
+                } else {
+                    startMotion();
+                }
+            });
+
+            motionDisableButton.addEventListener('click', function () {
+                stopMotion();
+            });
+
+            /* ========== Camera + Mic 相关 ========== */
+            function startMicMeter(stream) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                var source = audioCtx.createMediaStreamSource(stream);
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 1024;
+                source.connect(analyser);
+                var dataTime = new Uint8Array(analyser.fftSize);
+                var dataFreq = new Uint8Array(analyser.frequencyBinCount);
+
+                function tick() {
+                    analyser.getByteTimeDomainData(dataTime);
+                    var sum = 0;
+                    for (var i = 0; i < dataTime.length; i++) {
+                        var v = (dataTime[i] - 128) / 128;
+                        sum += v * v;
+                    }
+                    var rms = Math.sqrt(sum / dataTime.length);
+                    micLevelEl.textContent = 'Mic level: ' + rms.toFixed(3);
+
+                    analyser.getByteFrequencyData(dataFreq);
+                    var maxI = 0;
+                    for (var j = 1; j < dataFreq.length; j++) {
+                        if (dataFreq[j] > dataFreq[maxI]) maxI = j;
+                    }
+                    var freq = (maxI * audioCtx.sampleRate) / analyser.fftSize;
+                    micFreqEl.textContent = 'Peak freq: ' + Math.round(freq) + ' Hz';
+
+                    micRafId = requestAnimationFrame(tick);
+                }
+                tick();
+            }
+
+            function stopMicMeter() {
+                if (micRafId) {
+                    cancelAnimationFrame(micRafId);
+                    micRafId = null;
+                }
+                if (audioCtx) {
+                    audioCtx.close();
+                    audioCtx = null;
+                    analyser = null;
+                }
+                micLevelEl.textContent = 'Mic level: 0.000';
+                micFreqEl.textContent = 'Peak freq: -';
+            }
+
+            function startCamera() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    log('Camera + Mic API not available.');
+                    return;
+                }
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(function (stream) {
+                        cameraStream = stream;
+                        cameraPreview.srcObject = stream;
+                        startMicMeter(stream);
+                        log('Camera + Mic started.');
+                    })
+                    .catch(function (err) {
+                        var message = (err && err.message) ? err.message : 'Unknown error';
+                        log('Camera + Mic failed: ' + message);
+                    });
+            }
+
+            function stopCamera() {
+                stopMicMeter();
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(function (track) {
+                        track.stop();
+                    });
+                    cameraStream = null;
+                }
+                cameraPreview.srcObject = null;
+                log('Camera + Mic stopped.');
+            }
+
+            cameraStartButton.addEventListener('click', function () {
+                startCamera();
+            });
+
+            cameraStopButton.addEventListener('click', function () {
+                stopCamera();
+            });
+
+            updateBridgeStatus();
+        })();
+    </script>
+</body>
+</html>

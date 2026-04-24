@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bouncing Ball Demo</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --hero-color: #3498db;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            background: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #game-canvas {
+            border: 2px solid var(--text-color);
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-section {
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .video-section__label {
+            font-size: 12px;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            opacity: 0.7;
+        }
+
+        #bg_video {
+            width: 120px;
+            height: auto;
+            border-radius: 8px;
+            background: #000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="game-container">
+        <canvas id="game-canvas" width="350" height="300"></canvas>
+        <div class="video-section">
+            <div class="video-section__label">视频预览</div>
+            <video id="bg_video" data-editable="video" data-label="背景视频"
+                src="https://storage.googleapis.com/rezona-ai-prod/games/assets/video/0001/VIDEO_POOL_1475/South%20Park_1475396654003680.mp4"
+                preload="auto" loop muted playsinline></video>
+        </div>
+    </div>
+
+    <!-- ========================================
+         可编辑配置（集中 JSON 声明）
+         AI 生成时只需填充此 JSON 块
+         ======================================== -->
+    <script type="application/x-game-config">
+    {
+        "gravity": {
+            "type": "number",
+            "label": "世界重力",
+            "value": 0.5,
+            "min": 0,
+            "max": 2.0,
+            "step": 0.1
+        },
+        "bounce": {
+            "type": "number",
+            "label": "弹跳系数",
+            "value": 0.7,
+            "min": 0.1,
+            "max": 1.5,
+            "step": 0.1
+        },
+        "ballRadius": {
+            "type": "number",
+            "label": "小球大小",
+            "value": 20,
+            "min": 8,
+            "max": 60,
+            "step": 1,
+            "format": "int"
+        },
+        "ballColor": {
+            "type": "color",
+            "label": "小球颜色",
+            "value": "#3498db",
+            "cssVar": "--hero-color"
+        },
+        "bgColor": {
+            "type": "color",
+            "label": "背景颜色",
+            "value": "#f0f4f8",
+            "cssVar": "--bg-color"
+        },
+        "textColor": {
+            "type": "color",
+            "label": "描边与文字颜色",
+            "value": "#2c3e50",
+            "cssVar": "--text-color"
+        },
+        "title": {
+            "type": "text",
+            "label": "游戏标题",
+            "value": "Bouncing Ball"
+        }
+    }
+    </script>
+
+    <!-- 媒体元素：直接声明 data-editable -->
+    <img id="bgImage" data-editable="image" data-label="背景图片"
+        src="https://storage.googleapis.com/rezona-ai-prod/games/assets/video/cover/4382.jpg" hidden>
+
+    <audio id="sfx" data-editable="audio" data-label="碰撞音效" data-sfx-threshold="1.4" src="assets/audio/bung_01.mp3"
+        preload="auto" crossorigin="anonymous"></audio>
+
+    <audio id="bgm" data-editable="audio" data-label="背景音乐" src="assets/audio/space-fighter-loop.mp3" preload="auto"
+        loop crossorigin="anonymous"></audio>
+
+    <script>
+        // ========================================
+        // gameConfig 自动从 JSON 配置初始化
+        // ========================================
+        window.gameConfig = {};
+        window.gameConfigDefs = {};
+        (() => {
+            const script = document.querySelector('script[type="application/x-game-config"]');
+            if (!script) return;
+            try {
+                const config = JSON.parse(script.textContent);
+                window.gameConfigDefs = config;
+                Object.entries(config).forEach(([key, def]) => {
+                    window.gameConfig[key] = def.value;
+                    // 同步 CSS 变量初始值
+                    if (def.cssVar) {
+                        document.documentElement.style.setProperty(def.cssVar, def.value);
+                    }
+                });
+            } catch (e) { console.error('gameConfig 解析失败:', e); }
+        })();
+
+        // ========================================
+        // 音频系统
+        // ========================================
+        const sound = {
+            sfx: document.getElementById('sfx'),
+            bgm: document.getElementById('bgm')
+        };
+        let audioUnlocked = false;
+        let bgmStarted = false;
+        let lastSfxAt = 0;
+        const SFX_COOLDOWN = 120;
+
+        const startBgm = () => {
+            if (bgmStarted || !sound.bgm?.src) return;
+            bgmStarted = true;
+            sound.bgm.play().catch(() => { bgmStarted = false; });
+        };
+
+        const unlockAudio = () => {
+            if (audioUnlocked) return;
+            audioUnlocked = true;
+            if (sound.sfx?.src) {
+                sound.sfx.muted = true;
+                sound.sfx.play().then(() => { sound.sfx.pause(); sound.sfx.currentTime = 0; }).catch(() => { }).finally(() => { sound.sfx.muted = false; });
+            }
+            startBgm();
+        };
+
+        const playSfx = () => {
+            if (!audioUnlocked || !sound.sfx?.src) return;
+            const now = performance.now();
+            if (now - lastSfxAt < SFX_COOLDOWN) return;
+            lastSfxAt = now;
+            sound.sfx.currentTime = 0;
+            sound.sfx.play().catch(() => { });
+        };
+
+        const getSfxThreshold = () => {
+            const v = Number(sound.sfx?.dataset?.sfxThreshold);
+            return v > 0 ? v : 1;
+        };
+
+        // 首次交互解锁
+        ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(e =>
+            document.addEventListener(e, unlockAudio, { once: true })
+        );
+
+        // ========================================
+        // 游戏渲染
+        // ========================================
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const center = { x: canvas.width / 2, y: canvas.height / 2 };
+        const hexagon = { radius: Math.min(canvas.width, canvas.height) * 0.35, rotation: 0, rotationSpeed: 0.01 };
+        const hexPoints = Array.from({ length: 6 }, (_, i) => {
+            const angle = i * (Math.PI / 3);
+            return { x: hexagon.radius * Math.cos(angle), y: hexagon.radius * Math.sin(angle) };
+        });
+        let ball = { x: 0, y: -hexagon.radius / 2, vx: 1.2, vy: 0, radius: window.gameConfig.ballRadius };
+
+        // 背景图缓存
+        const bgCache = { src: '', img: null, ready: false };
+        const bgImageEl = document.getElementById('bgImage');
+        const updateBgImage = (src) => {
+            if (src === bgCache.src) return;
+            bgCache.src = src;
+            bgCache.ready = false;
+            if (!src) { bgCache.img = null; return; }
+            const img = new Image();
+            img.onload = () => { bgCache.img = img; bgCache.ready = true; };
+            img.src = src;
+        };
+        updateBgImage(bgImageEl?.src || '');
+
+        // 视频播放
+        const bgVideo = document.getElementById('bg_video');
+        const playVideo = () => { bgVideo.play().catch(() => { }); };
+        ['pointerdown', 'touchstart', 'keydown', 'click'].forEach(e =>
+            document.addEventListener(e, playVideo, { once: true })
+        );
+
+        function loop() {
+            // 背景
+            if (bgCache.ready && bgCache.img) {
+                ctx.drawImage(bgCache.img, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg-color').trim() || '#fff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 物理更新
+            hexagon.rotation += hexagon.rotationSpeed;
+            ball.radius = window.gameConfig.ballRadius;
+            ball.vy += window.gameConfig.gravity;
+            ball.x += ball.vx;
+            ball.y += ball.vy;
+
+            // 碰撞检测 (局部坐标)
+            const cos = Math.cos(hexagon.rotation), sin = Math.sin(hexagon.rotation);
+            let localX = ball.x * cos + ball.y * sin;
+            let localY = -ball.x * sin + ball.y * cos;
+            let localVx = ball.vx * cos + ball.vy * sin;
+            let localVy = -ball.vx * sin + ball.vy * cos;
+
+            let didHit = false;
+            for (let i = 0; i < hexPoints.length; i++) {
+                const p1 = hexPoints[i], p2 = hexPoints[(i + 1) % hexPoints.length];
+                const edgeX = p2.x - p1.x, edgeY = p2.y - p1.y;
+                const normalX = -edgeY, normalY = edgeX;
+                const normalLen = Math.hypot(normalX, normalY);
+                const nx = normalX / normalLen, ny = normalY / normalLen;
+                const dist = (localX - p1.x) * nx + (localY - p1.y) * ny;
+                if (dist < ball.radius) {
+                    const penetration = ball.radius - dist;
+                    localX += nx * penetration;
+                    localY += ny * penetration;
+                    const vn = localVx * nx + localVy * ny;
+                    if (vn < 0) {
+                        localVx -= (1 + window.gameConfig.bounce) * vn * nx;
+                        localVy -= (1 + window.gameConfig.bounce) * vn * ny;
+                        if (-vn >= getSfxThreshold()) didHit = true;
+                    }
+                }
+            }
+            if (didHit) playSfx();
+
+            // 转回全局坐标
+            ball.x = localX * cos - localY * sin;
+            ball.y = localX * sin + localY * cos;
+            ball.vx = localVx * cos - localVy * sin;
+            ball.vy = localVx * sin + localVy * cos;
+
+            // 绘制六边形
+            ctx.save();
+            ctx.translate(center.x, center.y);
+            ctx.rotate(hexagon.rotation);
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(hexPoints[0].x, hexPoints[0].y);
+            for (let i = 1; i < hexPoints.length; i++) ctx.lineTo(hexPoints[i].x, hexPoints[i].y);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+
+            // 绘制小球
+            ctx.save();
+            ctx.translate(center.x, center.y);
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--hero-color').trim();
+            ctx.fill();
+            ctx.closePath();
+            ctx.restore();
+
+            // 绘制标题
+            const title = window.gameConfig.title || '';
+            if (title) {
+                ctx.save();
+                ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';
+                ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+                ctx.textAlign = 'center';
+                ctx.fillText(title, center.x, 28);
+                ctx.restore();
+            }
+
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        // ========================================
+        // 媒体 src 变化自动重载
+        // ========================================
+        new MutationObserver((mutations) => {
+            mutations.forEach((m) => {
+                if (m.attributeName !== 'src') return;
+                const el = m.target;
+                if (el.id === 'bgm') {
+                    bgmStarted = false;
+                    el.load();
+                    if (audioUnlocked) startBgm();
+                } else if (el.id === 'sfx') {
+                    el.load();
+                } else if (el.id === 'bg_video') {
+                    el.load();
+                    el.play().catch(() => { });
+                } else if (el.id === 'bgImage') {
+                    updateBgImage(el.src);
+                }
+            });
+        }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['src'] });
+
+        // ========================================
+        // 暴露配置更新接口（供 simulator 调用）
+        // ========================================
+        window.updateGameConfig = (key, value) => {
+            window.gameConfig[key] = value;
+            const cssVar = window.gameConfigDefs?.[key]?.cssVar;
+            if (cssVar) {
+                document.documentElement.style.setProperty(cssVar, String(value));
+            }
+        };
+    </script>
+</body>
+
+</html>

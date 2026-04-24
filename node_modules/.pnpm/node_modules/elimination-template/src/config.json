@@ -1,0 +1,360 @@
+{
+  "_meta": {
+    "name": "Elimination Template",
+    "description": "Kernel-based template for elimination/pairing games."
+  },
+  "category": {
+    "family": "消除/配对类",
+    "mechanic": "Pluggable Kernels",
+    "goalSummary": "Switch mechanic kernels while keeping renderer/hud shell consistent."
+  },
+  "theme": {
+    "colors": {
+      "backgroundGradientTop": { "value": "#060A16", "type": "color" },
+      "backgroundGradientBottom": { "value": "#0B1024", "type": "color" },
+      "panel": { "value": "rgba(10,20,42,0.68)", "type": "color" },
+      "boardBackground": { "value": "#111A33", "type": "color" },
+      "gridLine": { "value": "rgba(39,86,130,0.45)", "type": "color" },
+      "textPrimary": { "value": "#D7EBFF", "type": "color" },
+      "textAccent": { "value": "#00F6FF", "type": "color" },
+      "iconColor": { "value": "#00F6FF", "type": "color" },
+      "blockHighlight": { "value": "rgba(0,246,255,0.58)", "type": "color" },
+      "blockShadow": { "value": "rgba(0,0,0,0.48)", "type": "color" }
+    },
+    "effects": {
+      "characterBlur": { "value": 18, "type": "number", "min": 0, "max": 40 },
+      "particleDensity": { "value": 0.55, "type": "number", "min": 0, "max": 1 },
+      "particleDrift": { "value": 0.3, "type": "number", "min": 0, "max": 2 },
+      "particlePalette": {
+        "value": ["#8BE9FD", "#A78BFA", "#6EE7B7", "#FDE68A"],
+        "type": "array"
+      },
+      "lineClearFlash": { "value": "neon_soft", "type": "string" },
+      "placementPulse": { "value": "ring_expand", "type": "string" },
+      "goalBloom": { "value": "ambient_bloom", "type": "string" }
+    }
+  },
+  "presentation": {
+    "ui": {
+      "title": { "value": "BLOCK BLAST", "type": "string" },
+      "subtitle": { "value": "Neon Grid Protocol", "type": "string" },
+      "scoreIcon": { "value": "👑", "type": "string" },
+      "ctaText": { "value": "NEON LINK ACTIVE", "type": "string" }
+    },
+    "feedbackMessages": {
+      "relax_hint": { "value": "试着优先拼满一整行或一整列", "type": "string" },
+      "select_piece_first": { "value": "先选择下方一个方块", "type": "string" },
+      "invalid_placement": { "value": "该位置无法放置", "type": "string" },
+      "piece_selected_to_place": { "value": "已选中方块，点击棋盘放置", "type": "string" }
+    },
+    "textTemplates": {
+      "status": {
+        "value": "{moves} | Target {target} | {gems} | {message}",
+        "type": "string"
+      },
+      "rulePanel": {
+        "value": "Fill rows and columns",
+        "type": "string"
+      },
+      "bestStorageKey": {
+        "value": "elimination-template:blockblast:best",
+        "type": "string"
+      }
+    },
+    "uiTemplateId": {
+      "value": "meme-match",
+      "type": "string"
+    },
+    "animation": {
+      "clear": { "value": "scale-fade", "type": "string" },
+      "drop": { "value": "bounce", "type": "string" },
+      "swapMs": { "value": 200, "type": "number", "min": 80, "max": 600 },
+      "clearMs": { "value": 300, "type": "number", "min": 100, "max": 800 }
+    },
+    "uiTemplate": {
+      "layout": {
+        "root": {
+          "regions": ["background", "hud_top", "grid_stage", "tray", "status_bar", "overlay"],
+          "adaptiveRules": {
+            "compactBreakpoint": 500,
+            "safeAreaAware": true,
+            "hudPriority": ["score_panel", "goal_panel", "settings_entry"]
+          }
+        },
+        "background": {
+          "layers": ["gradient", "character_blur", "particle_field", "vignette"],
+          "characterAnchor": "bottom-right",
+          "characterScaleMode": "cover",
+          "depth": 0
+        },
+        "hud_top": {
+          "slots": ["score_panel", "rule_panel", "best_panel", "goal_panel"],
+          "alignment": "space-between",
+          "depth": 20
+        },
+        "grid_stage": {
+          "frame": "glass_card",
+          "boardAnchor": "center",
+          "boardAspect": "square",
+          "cellSpacingToken": "spacing.gridGap",
+          "depth": 10
+        },
+        "tray": {
+          "slotCountSource": "gameplay.rules.bagSize.value",
+          "orientation": "horizontal",
+          "selectionStyle": "glow_ring",
+          "depth": 15
+        },
+        "status_bar": {
+          "items": ["hint_text", "objective_progress_text", "state_message"],
+          "priorityCollapse": true,
+          "depth": 20
+        },
+        "overlay": {
+          "modes": ["start", "pause", "result", "info"],
+          "cardStyle": "frosted_modal",
+          "ctaVariants": ["primary", "secondary"],
+          "depth": 40
+        }
+      },
+      "components": {
+        "score_panel": {
+          "type": "metric_card",
+          "bind": "state.score",
+          "labelBind": "presentation.ui.scoreIcon.value",
+          "format": "integer"
+        },
+        "goal_panel": {
+          "type": "progress_cluster",
+          "bind": ["targetScore", "gemTargets", "state.gemProgress"],
+          "displayMode": "bar_plus_tags"
+        },
+        "moves_panel": {
+          "type": "counter_chip",
+          "bind": ["moveLimit", "state.movesUsed"],
+          "fallbackLabel": "relax_mode"
+        },
+        "grid_board": {
+          "type": "interactive_grid_surface",
+          "bind": ["rows", "cols", "state.board"],
+          "gesture": "tap_cell"
+        },
+        "piece_tray": {
+          "type": "piece_slot_row",
+          "bind": ["state.bag", "state.selectedPieceIndex"],
+          "emptySlotBehavior": "dimmed"
+        },
+        "status_text": {
+          "type": "message_line",
+          "bind": "state.message",
+          "severitySource": "uiState.messageLevel"
+        },
+        "overlay_dialog": {
+          "type": "modal_card",
+          "bind": "state.overlay",
+          "actions": ["start_or_restart", "dismiss"]
+        }
+      },
+      "effects": {
+        "background_character_blur": {
+          "trigger": "always_on",
+          "intensityToken": "fx.characterBlur",
+          "parallaxFactor": 0.08
+        },
+        "floating_particles": {
+          "trigger": "always_on",
+          "densityToken": "fx.particleDensity",
+          "velocityToken": "fx.particleDrift",
+          "colorToken": "fx.particlePalette"
+        },
+        "line_clear_flash": {
+          "trigger": "event:line_clear",
+          "target": "grid_board",
+          "styleToken": "fx.lineClearFlash"
+        },
+        "placement_pulse": {
+          "trigger": "event:placement_success",
+          "target": "grid_board",
+          "styleToken": "fx.placementPulse"
+        },
+        "goal_reached_bloom": {
+          "trigger": "event:goal_threshold_reached",
+          "target": "goal_panel",
+          "styleToken": "fx.goalBloom"
+        }
+      },
+      "theme_hooks": [
+        "theme.colors.backgroundGradientTop",
+        "theme.colors.backgroundGradientBottom",
+        "theme.colors.panel",
+        "theme.colors.boardBackground",
+        "theme.colors.gridLine",
+        "theme.colors.textPrimary",
+        "theme.colors.textAccent",
+        "theme.colors.iconColor",
+        "theme.colors.blockHighlight",
+        "theme.colors.blockShadow",
+        "theme.effects.characterBlur",
+        "theme.effects.particleDensity",
+        "theme.effects.particleDrift",
+        "theme.effects.particlePalette",
+        "theme.effects.lineClearFlash",
+        "theme.effects.placementPulse",
+        "theme.effects.goalBloom"
+      ]
+    },
+    "uiMechanicMapping": {
+      "mapping": [
+        {
+          "mechanic": "grid",
+          "ui_component": "grid_board",
+          "ui_state_bindings": ["rows", "cols", "state.board"]
+        },
+        {
+          "mechanic": "placement",
+          "ui_component": "piece_tray + grid_board + status_text",
+          "ui_state_bindings": ["state.bag", "state.selectedPieceIndex", "state.message"]
+        },
+        {
+          "mechanic": "line_clear",
+          "ui_component": "grid_board + score_panel + goal_panel",
+          "ui_state_bindings": ["state.board", "state.score", "state.gemProgress"]
+        },
+        {
+          "mechanic": "goal_tracking",
+          "ui_component": "goal_panel + moves_panel + overlay_dialog",
+          "ui_state_bindings": ["targetScore", "gemTargets", "moveLimit", "state.movesUsed", "state.overlay"]
+        }
+      ],
+      "feedback": [
+        {
+          "mechanic": "grid",
+          "feedback": ["cell_hover_hint", "invalid_cell_dim", "board_focus_outline"]
+        },
+        {
+          "mechanic": "placement",
+          "feedback": ["selected_piece_glow", "placement_pulse", "invalid_placement_shake", "status_message_update"]
+        },
+        {
+          "mechanic": "line_clear",
+          "feedback": ["line_clear_flash", "score_pop_increment", "particle_burst", "soft_chime"]
+        },
+        {
+          "mechanic": "goal_tracking",
+          "feedback": ["progress_bar_fill", "target_chip_highlight", "goal_reached_bloom", "result_overlay_transition"]
+        }
+      ]
+    }
+  },
+  "gameplay": {
+    "gridSize": { "value": 8, "type": "number", "min": 6, "max": 10 },
+    "moves": { "value": 15, "type": "number", "min": 5, "max": 60 },
+    "goal": {
+      "type": "collect",
+      "target": "smile",
+      "count": 12
+    },
+    "board": {
+      "rows": { "value": 8, "type": "number", "min": 5, "max": 12 },
+      "cols": { "value": 8, "type": "number", "min": 5, "max": 12 }
+    },
+    "objectives": {
+      "targetScore": { "value": 1200, "type": "number", "min": 1, "max": 999999 },
+      "moveLimit": { "value": 0, "type": "number", "min": 0, "max": 200 },
+      "gemTargets": [
+        { "id": "ruby", "required": 4 },
+        { "id": "sapphire", "required": 3 }
+      ]
+    },
+    "bootstrap": {
+      "preFilledCells": [
+        { "row": 2, "col": 3, "type": "filled" },
+        { "row": 4, "col": 4, "type": "filled", "gemId": "ruby" }
+      ]
+    },
+    "rules": {
+      "bagSize": { "value": 3, "type": "number", "min": 1, "max": 5 }
+    },
+    "mechanics": {
+      "available": ["blockblast", "match3", "pairlink"],
+      "active": "match3",
+      "params": {
+        "match3": {
+          "cascadeEnabled": { "value": true, "type": "boolean" },
+          "allowInvalidSwap": { "value": false, "type": "boolean" },
+          "memes": {
+            "value": [
+              { "id": "smile", "label": "😄", "color": "#3BC7FF" },
+              { "id": "rage", "label": "😡", "color": "#A56BFF" },
+              { "id": "wow", "label": "😮", "color": "#FFD447" },
+              { "id": "lol", "label": "😂", "color": "#50F8AE" },
+              { "id": "cool", "label": "😎", "color": "#FF5DAF" }
+            ],
+            "type": "array"
+          }
+        },
+        "blockblast": {
+          "piecePool": {
+            "value": ["single", "line2", "line3", "line4", "L3", "square2", "T4"],
+            "type": "array"
+          },
+          "pieceColors": {
+            "value": ["#3B6AF6", "#2ED573", "#FFD93D", "#FF7A2F", "#FF4D4D", "#A66BFF", "#3DDCFF"],
+            "type": "array"
+          },
+          "gemChance": { "value": 0.2, "type": "number", "min": 0, "max": 1 },
+          "pieceWeights": {
+            "single": 18,
+            "line2": 14,
+            "line3": 10,
+            "line4": 8,
+            "L3": 8,
+            "square2": 6,
+            "T4": 7
+          }
+        }
+      }
+    }
+  },
+  "assets": {
+    "backgroundImage": {
+      "value": "",
+      "type": "string"
+    },
+    "backgroundMusic": {
+      "value": "",
+      "type": "string"
+    },
+    "goalMemeAvatar": {
+      "value": {
+        "smile": "😄"
+      },
+      "type": "object"
+    }
+  },
+  "physics": {
+    "enabled": { "value": false, "type": "boolean" },
+    "engine": { "value": "matterjs", "type": "string" },
+    "step": {
+      "fixedDeltaMs": { "value": 16.6667, "type": "number", "min": 1, "max": 50 }
+    },
+    "world": {
+      "gravityY": { "value": 0, "type": "number", "min": -40, "max": 40 },
+      "boundsPadding": { "value": 0.02, "type": "number", "min": 0, "max": 0.2 }
+    },
+    "placementImpulse": {
+      "x": { "value": 1.3, "type": "number", "min": 0, "max": 10 },
+      "y": { "value": 1.6, "type": "number", "min": 0, "max": 10 },
+      "ttlMs": { "value": 460, "type": "number", "min": 50, "max": 5000 },
+      "damping": { "value": 3.8, "type": "number", "min": 0, "max": 20 },
+      "restitution": { "value": 0.28, "type": "number", "min": 0, "max": 1 },
+      "radius": { "value": 0.018, "type": "number", "min": 0.001, "max": 0.2 },
+      "mass": { "value": 1, "type": "number", "min": 0.01, "max": 100 },
+      "lineClearMultiplier": { "value": 1.4, "type": "number", "min": 1, "max": 10 }
+    },
+    "maxBodies": { "value": 96, "type": "number", "min": 1, "max": 1000 },
+    "debug": {
+      "appendStatsToMessage": { "value": false, "type": "boolean" }
+    }
+  }
+}

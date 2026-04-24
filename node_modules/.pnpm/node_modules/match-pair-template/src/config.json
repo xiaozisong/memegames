@@ -1,0 +1,146 @@
+{
+  "_meta": {
+    "name": "Block Blast Test Config",
+    "description": "Relaxing block placement game with line clears and gem goals."
+  },
+  "category": {
+    "family": "消除/配对类",
+    "mechanic": "Block Blast!",
+    "goalSummary": "Place random blocks on a fixed board, clear full lines, and complete score plus gem goals."
+  },
+  "theme": {
+    "colors": {
+      "background": { "value": "#4B63B7", "type": "color" },
+      "backgroundGradientTop": { "value": "#4B63B7", "type": "color" },
+      "backgroundGradientBottom": { "value": "#5E78D6", "type": "color" },
+      "panel": { "value": "rgba(255,255,255,0.12)", "type": "color" },
+      "boardBackground": { "value": "#2E3A70", "type": "color" },
+      "gridLine": { "value": "rgba(255,255,255,0.05)", "type": "color" },
+      "textPrimary": { "value": "#FFFFFF", "type": "color" },
+      "textAccent": { "value": "#FFD93D", "type": "color" },
+      "iconColor": { "value": "#CFE3FF", "type": "color" },
+      "blockHighlight": { "value": "rgba(255,255,255,0.25)", "type": "color" },
+      "blockShadow": { "value": "rgba(0,0,0,0.2)", "type": "color" }
+    }
+  },
+  "presentation": {
+    "renderer": {
+      "available": ["dom", "pixi", "three"],
+      "active": "pixi"
+    },
+    "ui": {
+      "title": { "value": "Block Blast Test", "type": "string" },
+      "subtitle": { "value": "填满整行整列即可消除，完成分数与宝石目标", "type": "string" },
+      "scoreIcon": { "value": "👑", "type": "string" },
+      "ctaText": { "value": "RELAXING!", "type": "string" },
+      "showDebugPanel": { "value": true, "type": "boolean" }
+    },
+    "interaction": {
+      "inputProfile": { "value": "tap", "type": "string" },
+      "feedbackProfile": { "value": "standard", "type": "string" },
+      "animationProfile": { "value": "snappy", "type": "string" }
+    },
+    "animation": {
+      "clearMs": { "value": 220, "type": "number", "min": 50, "max": 1200 },
+      "dropMs": { "value": 180, "type": "number", "min": 50, "max": 1200 },
+      "comboPopMs": { "value": 260, "type": "number", "min": 50, "max": 1500 }
+    }
+  },
+  "gameplay": {
+    "board": {
+      "rows": { "value": 8, "type": "number", "min": 5, "max": 12 },
+      "cols": { "value": 8, "type": "number", "min": 5, "max": 12 }
+    },
+    "objectives": {
+      "targetScore": { "value": 1500, "type": "number", "min": 1, "max": 999999 },
+      "moveLimit": { "value": 0, "type": "number", "min": 0, "max": 200 },
+      "gemTargets": [
+        { "id": "ruby", "required": 6 },
+        { "id": "sapphire", "required": 4 },
+        { "id": "emerald", "required": 3 }
+      ]
+    },
+    "bootstrap": {
+      "preFilledCells": [
+        { "row": 2, "col": 3, "type": "filled" },
+        { "row": 4, "col": 4, "type": "filled", "gemId": "ruby" },
+        { "row": 3, "col": 5, "type": "filled", "gemId": "emerald" },
+        { "row": 5, "col": 1, "type": "filled" }
+      ]
+    },
+    "rules": {
+      "bagSize": { "value": 3, "type": "number", "min": 1, "max": 5 },
+      "revealWindow": { "value": 3, "type": "number", "min": 1, "max": 5 },
+      "pieceRotationEnabled": { "value": false, "type": "boolean" },
+      "scoring": {
+        "baseClear": { "value": 100, "type": "number", "min": 1, "max": 9999 },
+        "comboMultiplier": { "value": 1.2, "type": "number", "min": 1, "max": 5 },
+        "gemBonus": { "value": 50, "type": "number", "min": 0, "max": 9999 }
+      }
+    },
+    "mechanics": {
+      "available": ["match3", "blockblast", "merge2"],
+      "active": "blockblast",
+      "params": {
+        "match3": {
+          "minMatch": { "value": 3, "type": "number", "min": 3, "max": 6 },
+          "allowInvalidSwap": { "value": false, "type": "boolean" },
+          "cascadeEnabled": { "value": true, "type": "boolean" }
+        },
+        "blockblast": {
+          "simultaneousLineClear": { "value": true, "type": "boolean" },
+          "piecePool": {
+            "value": ["single", "line2", "line3", "line4", "L3", "square2", "T4"],
+            "type": "array"
+          },
+          "pieceColors": {
+            "value": ["#3B6AF6", "#2ED573", "#FFD93D", "#FF7A2F", "#FF4D4D", "#A66BFF", "#3DDCFF"],
+            "type": "array"
+          },
+          "gemChance": { "value": 0.2, "type": "number", "min": 0, "max": 1 },
+          "pieceWeights": {
+            "single": 18,
+            "line2": 14,
+            "line3": 10,
+            "line4": 8,
+            "L3": 8,
+            "square2": 6,
+            "T4": 7
+          }
+        },
+        "merge2": {
+          "spawnValues": { "value": [2, 2, 2, 4], "type": "array" },
+          "targetTile": { "value": 2048, "type": "number", "min": 16, "max": 8192 },
+          "allowChainMerge": { "value": false, "type": "boolean" }
+        }
+      }
+    }
+  },
+  "assets": {
+    "manifestVersion": "v1",
+    "images": {
+      "tileFilled": "https://example.com/assets/tile-filled.png",
+      "tileGemRuby": "https://example.com/assets/tile-gem-ruby.png",
+      "tileGemSapphire": "https://example.com/assets/tile-gem-sapphire.png",
+      "boardBackground": "https://example.com/assets/board-bg.png"
+    },
+    "audio": {
+      "bgm": "https://example.com/assets/bgm-loop.mp3",
+      "clear": "https://example.com/assets/sfx-clear.wav",
+      "combo": "https://example.com/assets/sfx-combo.wav",
+      "win": "https://example.com/assets/sfx-win.wav",
+      "lose": "https://example.com/assets/sfx-lose.wav"
+    },
+    "qualityProfiles": {
+      "default": {
+        "textureScale": 1
+      },
+      "low": {
+        "textureScale": 0.5
+      }
+    }
+  },
+  "externalFiles": {
+    "levelManifest": "https://example.com/data/levels.json"
+  }
+}

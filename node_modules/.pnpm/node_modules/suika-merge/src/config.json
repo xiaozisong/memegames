@@ -1,0 +1,118 @@
+{
+  "_comment": {
+    "name": "Suika Merge",
+    "description": "Physics merge mobile game based on elimination-template architecture."
+  },
+  "gameplay": {
+    "mode": "physics-merge",
+    "gravity": { "value": 1, "type": "number" },
+    "world": {
+      "width": { "value": 390, "type": "number" },
+      "height": { "value": 760, "type": "number" },
+      "wallThickness": { "value": 30, "type": "number" },
+      "groundHeight": { "value": 76, "type": "number" }
+    },
+    "spawnXRange": { "value": [56, 334], "type": "array" },
+    "spawnY": { "value": 88, "type": "number" },
+    "spawnCooldownMs": { "value": 260, "type": "number" },
+    "fruitScale": { "value": 1.6, "type": "number" },
+    "spawnWeights": {
+      "value": {
+        "fruit1": 68,
+        "fruit2": 24,
+        "fruit3": 8
+      },
+      "type": "object"
+    },
+    "gameOverLine": { "value": 120, "type": "number" },
+    "warningShowDistance": { "value": 52, "type": "number" },
+    "warningMinFruits": { "value": 5, "type": "number" },
+    "warningStartDelayMs": { "value": 3000, "type": "number" },
+    "warningHoldMs": { "value": 1500, "type": "number" },
+    "boss": {
+      "type": { "value": "fruitBoss", "type": "string" },
+      "maxPerRound": { "value": 1, "type": "number" },
+      "mergeChance": { "value": 0.35, "type": "number" }
+    },
+    "fruitTypes": {
+      "value": [
+        { "type": "fruit1", "radius": 15, "color": "#ff9db8", "score": 10 },
+        { "type": "fruit2", "radius": 21, "color": "#ffe36a", "score": 24 },
+        { "type": "fruit3", "radius": 27, "color": "#ffb347", "score": 46 },
+        { "type": "fruit4", "radius": 33, "color": "#f6e0a2", "score": 74 },
+        { "type": "fruit5", "radius": 40, "color": "#7ccf7d", "score": 116 },
+        { "type": "fruit6", "radius": 47, "color": "#f9d45d", "score": 156 },
+        { "type": "fruitBoss", "radius": 57, "color": "#47d17b", "score": 420 }
+      ],
+      "type": "array"
+    },
+    "mergeRules": {
+      "value": [
+        { "from": "fruit1", "to": "fruit2" },
+        { "from": "fruit2", "to": "fruit3" },
+        { "from": "fruit3", "to": "fruit4" },
+        { "from": "fruit4", "to": "fruit5" },
+        { "from": "fruit5", "to": "fruit6" },
+        { "from": "fruit6", "to": "fruitBoss" }
+      ],
+      "type": "array"
+    }
+  },
+  "physics": {
+    "enabled": { "value": true, "type": "boolean" },
+    "engine": { "value": "matterjs", "type": "string" },
+    "step": {
+      "fixedDeltaMs": { "value": 16.6667, "type": "number" }
+    },
+    "material": {
+      "restitution": { "value": 0.12, "type": "number" },
+      "friction": { "value": 0.018, "type": "number" },
+      "frictionStatic": { "value": 0.05, "type": "number" },
+      "frictionAir": { "value": 0.003, "type": "number" },
+      "spawnSpin": { "value": 0.06, "type": "number" }
+    }
+  },
+  "presentation": {
+    "uiTemplate": { "value": "fruit-suika", "type": "string" },
+    "effects": {
+      "merge": { "value": "pop-scale", "type": "string" },
+      "drop": { "value": "physics", "type": "string" }
+    }
+  },
+  "theme": {
+    "style": { "value": "fruit", "type": "string" },
+    "background": { "value": "", "type": "string" },
+    "fruitColors": { "value": "vivid", "type": "string" }
+  },
+  "assets": {
+    "fruits": {
+      "fruit1": "assets/fruits/fruit1.png",
+      "fruit2": "assets/fruits/fruit2.png",
+      "fruit3": "assets/fruits/fruit3.png",
+      "fruit4": "assets/fruits/fruit4.png",
+      "fruit5": "assets/fruits/fruit5.png",
+      "fruit6": "assets/fruits/fruit6.png",
+      "fruitBoss": "assets/fruits/fruitBoss.png",
+      "bg": "assets/fruits/bg.png",
+      "ground": "assets/fruits/ground.png",
+      "warning": "assets/fruits/warning.png",
+      "boom1": "assets/fruits/boom1.png",
+      "boom2": "assets/fruits/boom2.png"
+    },
+    "audio": {
+      "bgm": "assets/audio/bgm.ogg",
+      "start": "assets/audio/spawn.ogg",
+      "restart": "assets/audio/restart.ogg",
+      "gameover": "assets/audio/gameover.ogg",
+      "drop1": "assets/audio/1.mp3",
+      "drop2": "assets/audio/2.mp3",
+      "merge": "assets/audio/merge.mp3",
+      "blast": "assets/audio/blast.mp3",
+      "success": "assets/audio/success.mp3"
+    },
+    "sourceHint": {
+      "value": "copied-from-daxigua-res-raw-assets",
+      "type": "string"
+    }
+  }
+}

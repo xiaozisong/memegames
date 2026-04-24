@@ -1,0 +1,187 @@
+.suika-root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 20% 0%, #f8fbff 0%, #e8f5ff 38%, #d6ecff 100%);
+}
+
+.suika-loading {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, rgba(255, 246, 221, 0.96), rgba(255, 231, 188, 0.95));
+  z-index: 999;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #7a3b13;
+}
+
+.suika-loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.suika-loading-panel {
+  width: min(82vw, 340px);
+  border-radius: 18px;
+  border: 2px solid rgba(206, 124, 50, 0.65);
+  background: linear-gradient(180deg, rgba(255, 253, 239, 0.96), rgba(255, 236, 192, 0.95));
+  box-shadow: 0 16px 36px rgba(152, 77, 27, 0.22);
+  padding: 18px;
+}
+
+.suika-loading-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #9a4a1f;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.suika-loading-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(228, 162, 69, 0.35);
+}
+
+.suika-loading-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffc84d, #ff9d3f, #f17044);
+  transition: width 120ms linear;
+}
+
+.suika-loading-text {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #8c451b;
+  letter-spacing: 0.4px;
+}
+
+.suika-shell {
+  width: min(96vw, 520px);
+  height: min(96dvh, 920px);
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 22px 46px rgba(75, 112, 156, 0.25);
+}
+
+.suika-shell canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.suika-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+}
+
+.suika-top {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.suika-score {
+  padding: 2px 4px;
+}
+
+.suika-score-value {
+  font-size: clamp(36px, 8vw, 56px);
+  font-weight: 900;
+  line-height: 1;
+  color: #fee23b;
+  letter-spacing: 1px;
+  -webkit-text-stroke: 5px #964b23;
+  paint-order: stroke fill;
+  text-shadow:
+    -4px 0 0 #964b23,
+    4px 0 0 #964b23,
+    0 -4px 0 #964b23,
+    0 4px 0 #964b23,
+    -3px -3px 0 #964b23,
+    3px -3px 0 #964b23,
+    -3px 3px 0 #964b23,
+    3px 3px 0 #964b23;
+}
+
+.suika-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  background: rgba(109, 54, 27, 0.35);
+  pointer-events: none;
+}
+
+.suika-overlay.visible {
+  display: grid;
+}
+
+.suika-overlay-panel {
+  width: min(90%, 360px);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 252, 236, 0.97), rgba(255, 233, 185, 0.96));
+  border: 2px solid rgba(194, 104, 49, 0.7);
+  box-shadow: 0 20px 44px rgba(113, 57, 25, 0.28);
+  padding: 20px 18px 18px;
+  text-align: center;
+  color: #7c3f18;
+  pointer-events: auto;
+}
+
+.suika-overlay-panel h3 {
+  margin: 0;
+  color: #a04d1f;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.suika-overlay-panel p {
+  margin: 10px 0 0;
+  color: #8c4a1f;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.suika-overlay-panel button {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  background: linear-gradient(180deg, #f6b43d, #eb7b2e);
+  box-shadow: inset 0 -3px 0 rgba(150, 61, 17, 0.35);
+}
+
+@media (max-width: 520px), (max-height: 760px) {
+  .suika-shell {
+    width: min(99vw, 460px);
+    height: min(97dvh, 860px);
+    border-radius: 16px;
+  }
+
+  .suika-ui {
+    padding: calc(9px + env(safe-area-inset-top)) 8px calc(9px + env(safe-area-inset-bottom));
+  }
+
+  .suika-score-value {
+    -webkit-text-stroke: 4px #964b23;
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "_meta": {
+    "name": "Block-blast",
+    "description": "Block Placement Elimination template game for mobile."
+  },
+  "theme": {
+    "glow": "neon",
+    "boardBg": "rgba(0,0,0,0.6)",
+    "hud": "glassmorphism",
+    "effects": {
+      "characterBlur": { "value": 16, "type": "number" },
+      "particleDensity": { "value": 0.52, "type": "number" },
+      "particleDrift": { "value": 0.35, "type": "number" }
+    },
+    "colors": {
+      "backgroundGradientTop": { "value": "#0b0f1f", "type": "color" },
+      "backgroundGradientBottom": { "value": "#171032", "type": "color" },
+      "panel": { "value": "rgba(7,16,34,0.62)", "type": "color" },
+      "boardBackground": { "value": "rgba(9,20,44,0.78)", "type": "color" },
+      "gridLine": { "value": "rgba(55,101,170,0.46)", "type": "color" },
+      "textPrimary": { "value": "#e5f4ff", "type": "color" },
+      "textAccent": { "value": "#00f6ff", "type": "color" },
+      "iconColor": { "value": "#00f6ff", "type": "color" },
+      "blockHighlight": { "value": "rgba(80,233,255,0.55)", "type": "color" },
+      "blockShadow": { "value": "rgba(0,0,0,0.45)", "type": "color" }
+    }
+  },
+  "presentation": {
+    "uiTemplate": {
+      "layout": {
+        "root": {
+          "regions": ["hud_top", "status_bar", "overlay"],
+          "adaptiveRules": { "compactBreakpoint": 520 }
+        },
+        "hud_top": {
+          "slots": ["score_panel", "rule_panel", "best_panel", "goal_panel"]
+        },
+        "tray": {
+          "slotCountSource": "gameplay.rules.bagSize.value"
+        },
+        "background": {
+          "layers": ["character_blur", "particle_field"]
+        }
+      }
+    },
+    "uiMechanicMapping": {
+      "feedback": [
+        {
+          "mechanic": "placement",
+          "feedback": ["placement_pulse"]
+        },
+        {
+          "mechanic": "line_clear",
+          "feedback": ["line_clear_flash", "goal_reached_bloom"]
+        }
+      ]
+    },
+    "feedbackMessages": {
+      "relax_hint": "Try clearing rows and columns together.",
+      "select_piece_first": "Select a block from tray first.",
+      "invalid_placement": "This position is not valid.",
+      "piece_selected_to_place": "Drag to a highlighted position."
+    },
+    "textTemplates": {
+      "status": "{moves} | Target {target} | {gems} | {message}",
+      "rulePanel": "Fill any full row or column to clear.",
+      "bestStorageKey": "block-blast:best"
+    },
+    "renderer": {
+      "available": ["pixi"],
+      "active": "pixi"
+    },
+    "ui": {
+      "title": { "value": "BLOCK BLAST", "type": "string" },
+      "subtitle": { "value": "Place, clear and collect gems", "type": "string" },
+      "scoreIcon": { "value": "⚡", "type": "string" },
+      "ctaText": { "value": "NEON GRID", "type": "string" }
+    },
+    "animation": {
+      "clear": { "value": "glow-fade", "type": "string" },
+      "drop": { "value": "scale-in", "type": "string" },
+      "clearMs": { "value": 300, "type": "number", "min": 50, "max": 1200 }
+    },
+    "interaction": {
+      "dragPreview": { "value": true, "type": "boolean" },
+      "snap": { "value": true, "type": "boolean" }
+    }
+  },
+  "gameplay": {
+    "mode": "block-placement",
+    "gridSize": 8,
+    "moves": 15,
+    "board": {
+      "rows": { "value": 8, "type": "number" },
+      "cols": { "value": 8, "type": "number" }
+    },
+    "rules": {
+      "bagSize": { "value": 3, "type": "number" }
+    },
+    "initialBoard": {
+      "filledCells": [
+        { "row": 1, "col": 3, "color": "#7b66ff" },
+        { "row": 2, "col": 5, "color": "#36d7ff", "gemType": "blue" },
+        { "row": 4, "col": 4, "color": "#ffd451", "gemType": "red" },
+        { "row": 6, "col": 2, "color": "#4effb2" }
+      ]
+    },
+    "shapes": [
+      { "type": "L" },
+      { "type": "square" },
+      { "type": "line3" },
+      { "type": "line4" },
+      { "type": "T" }
+    ],
+    "gemTargets": [
+      { "id": "red", "required": 10 },
+      { "id": "blue", "required": 8 }
+    ],
+    "mechanics": {
+      "active": "block-placement",
+      "params": {
+        "blockPlacement": {
+          "pieceColors": {
+            "value": ["#36d7ff", "#9b6cff", "#ffd34a", "#54ffb5"],
+            "type": "array"
+          },
+          "gemSpawnChance": { "value": 0.2, "type": "number" },
+          "scorePerCell": { "value": 8, "type": "number" },
+          "scorePerLine": { "value": 120, "type": "number" },
+          "scorePerGem": { "value": 60, "type": "number" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "_comment": "Central game configuration. Put all color palettes, tunable gameplay parameters, image URLs, audio URLs, and any other referenced file URLs here.",
+  "theme": {
+    "background": "#FAF8EF",
+    "board": "#BBADA0",
+    "cell": "#CDC1B4",
+    "textDark": "#776E65",
+    "textLight": "#F9F6F2",
+    "tiles": {
+      "2": "#EEE4DA",
+      "4": "#EDE0C8",
+      "8": "#F2B179",
+      "16": "#F59563",
+      "32": "#F67C5F",
+      "64": "#F65E3B",
+      "128": "#EDCF72",
+      "256": "#EDCC61",
+      "512": "#EDC850",
+      "1024": "#EDC53F",
+      "2048": "#EDC22E"
+    },
+    "modal": {
+      "overlay": "#3A312A",
+      "card": "#F7F2EA",
+      "cardHighlight": "#FFFFFF",
+      "button": "#8F7A66",
+      "shadow": "#000000"
+    }
+  },
+  "gameplay": {
+    "params": {
+      "swipeThreshold": { "value": 28, "type": "number", "min": 8, "max": 60 },
+      "tilePulseSpawn": { "value": 0.34, "type": "number", "min": 0, "max": 1 },
+      "tilePulseMove": { "value": 0.18, "type": "number", "min": 0, "max": 1 },
+      "tilePulseDecay": { "value": 2.5, "type": "number", "min": 0.1, "max": 8 },
+      "statusFlashSpeed": { "value": 0.03, "type": "number", "min": 0.01, "max": 0.2 },
+      "scoreFlashSpeed": { "value": 0.05, "type": "number", "min": 0.01, "max": 0.2 },
+      "boardTopOffset": { "value": 140, "type": "number", "min": 80, "max": 220 },
+      "boardPadding": { "value": 18, "type": "number", "min": 8, "max": 40 },
+      "boardGap": { "value": 10, "type": "number", "min": 4, "max": 20 }
+    }
+  },
+  "ui": {
+    "text": {
+      "statusReady": "滑动或方向键移动方块",
+      "statusInvalid": "该方向无法移动",
+      "statusSwipeHint": "请滑动控制方块",
+      "statusWin": "你已达成 2048，继续挑战更高分！",
+      "statusGameOver": "游戏结束，按 R 重新开始",
+      "tip": "移动端支持滑动，按 R 重新开始",
+      "scoreLabel": "SCORE",
+      "bestLabel": "BEST",
+      "modalStartTitle": "2048",
+      "modalStartDesc": "滑动屏幕或使用方向键，合并数字并冲击更高分",
+      "modalStartButton": "点击开始",
+      "modalEndTitle": "游戏结束",
+      "modalEndButton": "点击再来一局"
+    }
+  },
+  "assets": {
+    "images": {},
+    "audio": {}
+  },
+  "externalFiles": {}
+}

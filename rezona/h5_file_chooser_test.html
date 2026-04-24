@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>H5 File Chooser Test</title>
+    <style>
+      body {
+        margin: 0;
+        background: #050816;
+        color: #e5e7eb;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 20px 16px 28px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .desc {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #9ca3af;
+      }
+
+      .card {
+        margin-top: 14px;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 23, 42, 0.72);
+      }
+
+      .title {
+        margin: 0;
+        font-size: 14px;
+        color: #cbd5e1;
+      }
+
+      .hint {
+        margin: 6px 0 10px;
+        font-size: 12px;
+        color: #94a3b8;
+      }
+
+      input[type="file"] {
+        width: 100%;
+        color: #e5e7eb;
+        font-size: 13px;
+      }
+
+      .preview {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 8px;
+      }
+
+      .preview img,
+      .preview video {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: #111827;
+      }
+
+      .logs {
+        margin-top: 8px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 12px;
+        color: #93c5fd;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 8px 12px;
+        color: #e5e7eb;
+        background: #334155;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>H5 File Chooser Test</h1>
+      <p class="desc">No JSBridge. Verify whether native WebView can open system picker.</p>
+
+      <section class="card">
+        <h2 class="title">Single Image</h2>
+        <p class="hint">accept=image/*</p>
+        <input id="pick-image" type="file" accept="image/*" />
+        <div class="preview" id="pick-image-preview"></div>
+        <pre class="logs" id="pick-image-logs">No file selected</pre>
+      </section>
+
+      <section class="card">
+        <h2 class="title">Single Video</h2>
+        <p class="hint">accept=video/*</p>
+        <input id="pick-video" type="file" accept="video/*" />
+        <div class="preview" id="pick-video-preview"></div>
+        <pre class="logs" id="pick-video-logs">No file selected</pre>
+      </section>
+
+      <section class="card">
+        <h2 class="title">Image Or Video</h2>
+        <p class="hint">accept=image/*,video/*</p>
+        <input id="pick-mixed" type="file" accept="image/*,video/*" />
+        <div class="preview" id="pick-mixed-preview"></div>
+        <pre class="logs" id="pick-mixed-logs">No file selected</pre>
+      </section>
+
+      <section class="card">
+        <h2 class="title">Multiple Images</h2>
+        <p class="hint">accept=image/*, multiple</p>
+        <input id="pick-images" type="file" accept="image/*" multiple />
+        <div class="preview" id="pick-images-preview"></div>
+        <pre class="logs" id="pick-images-logs">No file selected</pre>
+      </section>
+
+      <section class="card">
+        <button id="clear-all">Clear preview</button>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        var objectUrls = [];
+
+        function revokeAllObjectUrls() {
+          objectUrls.forEach(function (url) {
+            URL.revokeObjectURL(url);
+          });
+          objectUrls = [];
+        }
+
+        function formatFile(file) {
+          return JSON.stringify(
+            {
+              name: file.name,
+              type: file.type,
+              size: file.size,
+              lastModified: file.lastModified,
+            },
+            null,
+            2
+          );
+        }
+
+        function renderPreview(container, file) {
+          var url = URL.createObjectURL(file);
+          objectUrls.push(url);
+
+          if (file.type.indexOf("image/") === 0) {
+            var image = document.createElement("img");
+            image.src = url;
+            image.alt = file.name;
+            container.appendChild(image);
+            return;
+          }
+
+          if (file.type.indexOf("video/") === 0) {
+            var video = document.createElement("video");
+            video.src = url;
+            video.controls = true;
+            video.preload = "metadata";
+            container.appendChild(video);
+            return;
+          }
+
+          var block = document.createElement("div");
+          block.textContent = file.name;
+          container.appendChild(block);
+        }
+
+        function setupInput(inputId) {
+          var input = document.getElementById(inputId);
+          var logs = document.getElementById(inputId + "-logs");
+          var preview = document.getElementById(inputId + "-preview");
+
+          input.addEventListener("change", function () {
+            preview.innerHTML = "";
+            var files = Array.from(input.files || []);
+            if (files.length === 0) {
+              logs.textContent = "No file selected";
+              return;
+            }
+
+            var lines = [];
+            files.forEach(function (file, index) {
+              lines.push("#" + (index + 1));
+              lines.push(formatFile(file));
+              renderPreview(preview, file);
+            });
+            logs.textContent = lines.join("\n");
+          });
+        }
+
+        setupInput("pick-image");
+        setupInput("pick-video");
+        setupInput("pick-mixed");
+        setupInput("pick-images");
+
+        document.getElementById("clear-all").addEventListener("click", function () {
+          revokeAllObjectUrls();
+          ["pick-image", "pick-video", "pick-mixed", "pick-images"].forEach(function (id) {
+            var input = document.getElementById(id);
+            var logs = document.getElementById(id + "-logs");
+            var preview = document.getElementById(id + "-preview");
+            input.value = "";
+            logs.textContent = "No file selected";
+            preview.innerHTML = "";
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

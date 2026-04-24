@@ -1,0 +1,14 @@
+{
+  "name": "games-lib",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev:stack": "pnpm --filter stack-game dev",
+    "dev:shooter": "pnpm --filter shooter-game dev",
+    "build:stack": "pnpm --filter stack-game build",
+    "build:shooter": "pnpm --filter shooter-game build",
+    "build": "pnpm -r --filter ./games/* build",
+    "sync:suika": "pnpm --filter suika-merge exec vite build --base ./ --outDir ../../web/play/suika-merge --emptyOutDir"
+  }
+}
