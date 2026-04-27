@@ -7,6 +7,18 @@ export interface GameItem {
 
 export const games: GameItem[] = [
   {
+    slug: "cut-rope-nobuild",
+    title: "Cut Rope No Build",
+    description: "轻量绳索约束 + 重力玩法，点击切断绳索，让糖果落入目标并收集星星。",
+    cover: "🍬"
+  },
+  {
+    slug: "snake-nobuild",
+    title: "Snake No Build",
+    description: "参考 slither.io 的连续路径贪吃蛇，使用 Pixi.Graphics 渲染平滑蛇身与粒子食物。",
+    cover: "🐍"
+  },
+  {
     slug: "game-2048",
     title: "2048",
     description: "经典数字合并玩法，滑动方向键合成 2048。",

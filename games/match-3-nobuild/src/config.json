@@ -1,4 +1,5 @@
 {
+  "_comment": { "value": "Meme Match No Build", "type": "string", "label": "" },
   "_meta_name": { "value": "Match-3 No Build", "type": "string", "label": "模板名称" },
   "_meta_description": { "value": "Production-grade no-build H5 match-3 game built on Pixi.js template architecture.", "type": "string", "label": "模板说明" },
 

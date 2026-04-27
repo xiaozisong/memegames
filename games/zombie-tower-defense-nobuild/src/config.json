@@ -1,0 +1,205 @@
+{
+  "_meta_name": { "value": "Zombie Tower Defense Template", "type": "string", "label": "模板名称" },
+  "_meta_description": { "value": "Pixi.js no-build H5 zombie tower defense template with config-driven visuals.", "type": "string", "label": "模板说明" },
+
+  "gameplay_mechanics_active": { "value": "towerDefense", "type": "string", "label": "当前玩法标识" },
+  "gameplay_title": { "value": "Zombie Tower Defense", "type": "string", "label": "游戏标题" },
+  "gameplay_subtitle": { "value": "竖版尸潮塔防，购买并升级炮台守住基地。", "type": "string", "label": "游戏副标题" },
+
+  "world_width": { "value": 720, "type": "int", "label": "世界宽度" },
+  "world_height": { "value": 1280, "type": "int", "label": "世界高度" },
+  "world_background_color": { "value": "#0f172a", "type": "color", "label": "背景色" },
+  "world_grid_color": { "value": "#1e293b", "type": "color", "label": "网格色" },
+  "world_path_color": { "value": "#475569", "type": "color", "label": "路径色" },
+  "world_path_border_color": { "value": "#94a3b8", "type": "color", "label": "路径边框色" },
+  "world_path_width": { "value": 56, "type": "int", "label": "路径宽度" },
+  "world_accent_color": { "value": "#38bdf8", "type": "color", "label": "强调色" },
+  "world_danger_color": { "value": "#fb7185", "type": "color", "label": "危险色" },
+  "world_gold_color": { "value": "#facc15", "type": "color", "label": "金币色" },
+  "world_slot_color": { "value": "#334155", "type": "color", "label": "槽位色" },
+  "world_slot_ready_color": { "value": "#1d4ed8", "type": "color", "label": "槽位激活色" },
+
+  "assets_background_type": { "value": "sprite", "type": "string", "label": "背景资源类型" },
+  "assets_background_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/9bf918903a82486c965ebd9113f704d9.png", "type": "image", "label": "背景图片" },
+
+  "assets_enemy_level1_type": { "value": "shape", "type": "string", "label": "一级怪资源类型" },
+  "assets_enemy_level1_shape": { "value": "circle", "type": "string", "label": "一级怪形状" },
+  "assets_enemy_level1_color": { "value": "#4ade80", "type": "color", "label": "一级怪颜色" },
+  "assets_enemy_level1_radius": { "value": 44, "type": "int", "label": "一级怪半径" },
+  "assets_enemy_level1_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/c3bc337c537e44759fdcf4a5c415fe36.png", "type": "image", "label": "一级怪图片" },
+
+  "assets_enemy_level2_type": { "value": "shape", "type": "string", "label": "二级怪资源类型" },
+  "assets_enemy_level2_shape": { "value": "circle", "type": "string", "label": "二级怪形状" },
+  "assets_enemy_level2_color": { "value": "#84cc16", "type": "color", "label": "二级怪颜色" },
+  "assets_enemy_level2_radius": { "value": 50, "type": "int", "label": "二级怪半径" },
+  "assets_enemy_level2_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/bb03e6dc9c3d48d68e70b27fe2fc3281.png", "type": "image", "label": "二级怪图片" },
+
+  "assets_enemy_level3_type": { "value": "shape", "type": "string", "label": "三级怪资源类型" },
+  "assets_enemy_level3_shape": { "value": "circle", "type": "string", "label": "三级怪形状" },
+  "assets_enemy_level3_color": { "value": "#f59e0b", "type": "color", "label": "三级怪颜色" },
+  "assets_enemy_level3_radius": { "value": 58, "type": "int", "label": "三级怪半径" },
+  "assets_enemy_level3_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/d9e5619611674079b5cc9b392cf25f8c.png", "type": "image", "label": "三级怪图片" },
+
+  "assets_boss_enemy_type": { "value": "shape", "type": "string", "label": "Boss 资源类型" },
+  "assets_boss_enemy_shape": { "value": "rectangle", "type": "string", "label": "Boss 形状" },
+  "assets_boss_enemy_color": { "value": "#ef4444", "type": "color", "label": "Boss 颜色" },
+  "assets_boss_enemy_width": { "value": 220, "type": "int", "label": "Boss 宽度" },
+  "assets_boss_enemy_height": { "value": 220, "type": "int", "label": "Boss 高度" },
+  "assets_boss_enemy_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/587aad416a0544d696380ba98059a4f2.png", "type": "image", "label": "Boss 图片" },
+
+  "assets_tower_type": { "value": "shape", "type": "string", "label": "炮台资源类型" },
+  "assets_tower_shape": { "value": "square", "type": "string", "label": "炮台形状" },
+  "assets_tower_color": { "value": "#60a5fa", "type": "color", "label": "炮台颜色" },
+  "assets_tower_size": { "value": 104, "type": "int", "label": "炮台尺寸" },
+  "assets_tower_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/b05428d463a7427dba1ca4119f0a4f89.png", "type": "image", "label": "炮台图片" },
+
+  "assets_bullet_type": { "value": "shape", "type": "string", "label": "子弹资源类型" },
+  "assets_bullet_shape": { "value": "circle", "type": "string", "label": "子弹形状" },
+  "assets_bullet_color": { "value": "#facc15", "type": "color", "label": "子弹颜色" },
+  "assets_bullet_radius": { "value": 8, "type": "int", "label": "子弹半径" },
+  "assets_bullet_src": { "value": "", "type": "image", "label": "子弹图片" },
+
+  "assets_base_type": { "value": "shape", "type": "string", "label": "主基地资源类型" },
+  "assets_base_shape": { "value": "triangle", "type": "string", "label": "主基地形状" },
+  "assets_base_color": { "value": "#38bdf8", "type": "color", "label": "主基地颜色" },
+  "assets_base_size": { "value": 190, "type": "int", "label": "主基地尺寸" },
+  "assets_base_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/7ffa09ad589549de90ce8f85358a56c0.png", "type": "image", "label": "主基地图片" },
+
+  "assets_sub_base_type": { "value": "shape", "type": "string", "label": "副基地资源类型" },
+  "assets_sub_base_shape": { "value": "square", "type": "string", "label": "副基地形状" },
+  "assets_sub_base_color": { "value": "#f87171", "type": "color", "label": "副基地颜色" },
+  "assets_sub_base_size": { "value": 132, "type": "int", "label": "副基地尺寸" },
+  "assets_sub_base_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/e803bf76059e45f3ae862a53b6879118.png", "type": "image", "label": "副基地图片" },
+
+  "assets_victory_type": { "value": "sprite", "type": "string", "label": "胜利页资源类型" },
+  "assets_victory_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/be9e5803a59946b8bb9e40ea14a6443a.png", "type": "image", "label": "胜利页图片" },
+
+  "audio_bgm_src": { "value": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/c8460e7e21834d848b29bb1d6d78c8d0.mp3", "type": "audio", "label": "背景音乐" },
+  "audio_bgm_volume": { "value": 0.4, "type": "float", "label": "背景音乐音量" },
+  "audio_bgm_loop": { "value": true, "type": "bool", "label": "背景音乐循环" },
+  "audio_hit_src": { "value": "", "type": "audio", "label": "受击音效" },
+  "audio_hit_volume": { "value": 0.55, "type": "float", "label": "受击音量" },
+  "audio_attack_src": { "value": "", "type": "audio", "label": "攻击音效" },
+  "audio_attack_volume": { "value": 0.35, "type": "float", "label": "攻击音量" },
+
+  "overlay_intro_title": { "value": "尸潮来袭", "type": "string", "label": "开始弹窗标题" },
+  "overlay_intro_body": { "value": "点击开始，观察自动炮塔阻止僵尸摧毁基地。", "type": "string", "label": "开始弹窗正文" },
+  "overlay_intro_button_text": { "value": "开始防守", "type": "string", "label": "开始弹窗按钮文案" },
+  "overlay_defeat_title": { "value": "基地沦陷", "type": "string", "label": "失败弹窗标题" },
+  "overlay_defeat_body": { "value": "僵尸摧毁了基地。点击重新布防。", "type": "string", "label": "失败弹窗正文" },
+  "overlay_defeat_button_text": { "value": "重新开始", "type": "string", "label": "失败弹窗按钮文案" },
+  "overlay_victory_title": { "value": "防守成功", "type": "string", "label": "胜利弹窗标题" },
+  "overlay_victory_body": { "value": "所有尸潮已清除，基地安全。", "type": "string", "label": "胜利弹窗正文" },
+  "overlay_victory_button_text": { "value": "再次挑战", "type": "string", "label": "胜利弹窗按钮文案" },
+  "overlay_ui_title_font_size": { "value": 56, "type": "int", "label": "弹窗标题字号" },
+  "overlay_ui_body_font_size": { "value": 28, "type": "int", "label": "弹窗正文字号" },
+  "overlay_ui_button_font_size": { "value": 28, "type": "int", "label": "弹窗按钮字号" },
+
+  "path_points": {
+    "value": [{ "x": 360, "y": 1160 }, { "x": 360, "y": 1010 }],
+    "type": "json",
+    "label": "路径点"
+  },
+  "spawn_lanes": {
+    "value": [{ "x": 120, "y": 1160 }, { "x": 360, "y": 1160 }, { "x": 600, "y": 1160 }],
+    "type": "json",
+    "label": "出生路线"
+  },
+
+  "enemy_base_hp": { "value": 96, "type": "int", "label": "基础血量" },
+  "enemy_base_speed": { "value": 74, "type": "float", "label": "基础移速" },
+  "enemy_touch_damage": { "value": 2, "type": "int", "label": "基础伤害" },
+  "enemy_reward_gold": { "value": 6, "type": "int", "label": "基础奖励金币" },
+  "enemy_attack_interval_ms": { "value": 920, "type": "int", "label": "基础攻击间隔" },
+
+  "enemy_types_level1_asset_key": { "value": "enemyLevel1", "type": "string", "label": "一级怪资源键" },
+  "enemy_types_level1_hp_multiplier": { "value": 0.62, "type": "float", "label": "一级怪血量倍率" },
+  "enemy_types_level1_damage_multiplier": { "value": 0.66, "type": "float", "label": "一级怪伤害倍率" },
+  "enemy_types_level1_speed_multiplier": { "value": 0.82, "type": "float", "label": "一级怪速度倍率" },
+  "enemy_types_level1_reward_multiplier": { "value": 0.82, "type": "float", "label": "一级怪奖励倍率" },
+  "enemy_types_level1_size_multiplier": { "value": 0.88, "type": "float", "label": "一级怪尺寸倍率" },
+  "enemy_types_level1_label": { "value": "Lv1", "type": "string", "label": "一级怪标签" },
+
+  "enemy_types_level2_asset_key": { "value": "enemyLevel2", "type": "string", "label": "二级怪资源键" },
+  "enemy_types_level2_hp_multiplier": { "value": 0.92, "type": "float", "label": "二级怪血量倍率" },
+  "enemy_types_level2_damage_multiplier": { "value": 0.8, "type": "float", "label": "二级怪伤害倍率" },
+  "enemy_types_level2_speed_multiplier": { "value": 0.88, "type": "float", "label": "二级怪速度倍率" },
+  "enemy_types_level2_reward_multiplier": { "value": 0.95, "type": "float", "label": "二级怪奖励倍率" },
+  "enemy_types_level2_size_multiplier": { "value": 0.96, "type": "float", "label": "二级怪尺寸倍率" },
+  "enemy_types_level2_label": { "value": "Lv2", "type": "string", "label": "二级怪标签" },
+
+  "enemy_types_level3_asset_key": { "value": "enemyLevel3", "type": "string", "label": "三级怪资源键" },
+  "enemy_types_level3_hp_multiplier": { "value": 2.3, "type": "float", "label": "三级怪血量倍率" },
+  "enemy_types_level3_damage_multiplier": { "value": 1.42, "type": "float", "label": "三级怪伤害倍率" },
+  "enemy_types_level3_speed_multiplier": { "value": 1.08, "type": "float", "label": "三级怪速度倍率" },
+  "enemy_types_level3_reward_multiplier": { "value": 1.48, "type": "float", "label": "三级怪奖励倍率" },
+  "enemy_types_level3_size_multiplier": { "value": 1.16, "type": "float", "label": "三级怪尺寸倍率" },
+  "enemy_types_level3_label": { "value": "Lv3", "type": "string", "label": "三级怪标签" },
+
+  "enemy_types_boss_asset_key": { "value": "bossEnemy", "type": "string", "label": "Boss 资源键" },
+  "enemy_types_boss_hp_multiplier": { "value": 9.5, "type": "float", "label": "Boss 血量倍率" },
+  "enemy_types_boss_damage_multiplier": { "value": 2.6, "type": "float", "label": "Boss 伤害倍率" },
+  "enemy_types_boss_speed_multiplier": { "value": 0.72, "type": "float", "label": "Boss 速度倍率" },
+  "enemy_types_boss_reward_multiplier": { "value": 8, "type": "float", "label": "Boss 奖励倍率" },
+  "enemy_types_boss_size_multiplier": { "value": 1.9, "type": "float", "label": "Boss 尺寸倍率" },
+  "enemy_types_boss_label": { "value": "Boss", "type": "string", "label": "Boss 标签" },
+
+  "bullet_speed": { "value": 620, "type": "float", "label": "子弹速度" },
+
+  "tower_purchase_cost": { "value": 20, "type": "int", "label": "炮台购买价格" },
+  "tower_max_level": { "value": 5, "type": "int", "label": "炮台最大等级" },
+  "tower_base_damage": { "value": 12, "type": "int", "label": "炮台基础伤害" },
+  "tower_damage_step": { "value": 12, "type": "int", "label": "炮台升级伤害增量" },
+  "tower_base_range": { "value": 170, "type": "int", "label": "炮台基础范围" },
+  "tower_range_step": { "value": 18, "type": "int", "label": "炮台升级范围增量" },
+  "tower_base_fire_rate_ms": { "value": 920, "type": "int", "label": "炮台基础攻速间隔" },
+  "tower_fire_rate_step_ms": { "value": 120, "type": "int", "label": "炮台升级攻速增量" },
+  "tower_min_fire_rate_ms": { "value": 420, "type": "int", "label": "炮台最小攻速间隔" },
+  "tower_upgrade_base_cost": { "value": 26, "type": "int", "label": "炮台升级基础价格" },
+  "tower_upgrade_cost_step": { "value": 18, "type": "int", "label": "炮台升级价格增量" },
+
+  "base_max_level": { "value": 5, "type": "int", "label": "主基地最大等级" },
+  "base_x": { "value": 360, "type": "int", "label": "主基地 X" },
+  "base_y": { "value": 540, "type": "int", "label": "主基地 Y" },
+  "base_start_gold": { "value": 40, "type": "int", "label": "初始金币" },
+  "base_gold_per_second": { "value": 4, "type": "float", "label": "每秒金币" },
+  "base_gold_rate_upgrade_step": { "value": 2, "type": "float", "label": "主基地升级金币增量" },
+  "base_upgrade_base_cost": { "value": 30, "type": "int", "label": "主基地升级基础价格" },
+  "base_upgrade_cost_step": { "value": 30, "type": "int", "label": "主基地升级价格增量" },
+
+  "sub_base_x": { "value": 360, "type": "int", "label": "副基地 X" },
+  "sub_base_y": { "value": 1010, "type": "int", "label": "副基地 Y" },
+  "sub_base_max_hp": { "value": 180, "type": "int", "label": "副基地最大血量" },
+  "sub_base_regen_per_second": { "value": 4, "type": "float", "label": "副基地每秒回血" },
+  "sub_base_regen_delay_ms": { "value": 3200, "type": "int", "label": "副基地受击后恢复延迟" },
+
+  "tower_slots": {
+    "value": [
+      { "id": "slot-1", "x": 110, "y": 540 },
+      { "id": "slot-2", "x": 610, "y": 540 },
+      { "id": "slot-3", "x": 110, "y": 840 },
+      { "id": "slot-4", "x": 360, "y": 840 },
+      { "id": "slot-5", "x": 610, "y": 840 }
+    ],
+    "type": "json",
+    "label": "炮台槽位"
+  },
+
+  "waves": {
+    "value": [
+      { "count": 8, "spawnIntervalMs": 880, "enemyHp": 96, "enemySpeed": 74, "touchDamage": 2, "enemyReward": 7, "attackIntervalMs": 1040, "delayAfterMs": 4500 },
+      { "count": 10, "spawnIntervalMs": 840, "enemyHp": 108, "enemySpeed": 76, "touchDamage": 2, "enemyReward": 8, "attackIntervalMs": 1000, "delayAfterMs": 4200 },
+      { "count": 12, "spawnIntervalMs": 810, "enemyHp": 128, "enemySpeed": 78, "touchDamage": 3, "enemyReward": 9, "attackIntervalMs": 960, "delayAfterMs": 4000 },
+      { "count": 14, "spawnIntervalMs": 780, "enemyHp": 148, "enemySpeed": 80, "touchDamage": 3, "enemyReward": 10, "attackIntervalMs": 920, "delayAfterMs": 3800 },
+      { "count": 16, "spawnIntervalMs": 750, "enemyHp": 176, "enemySpeed": 82, "touchDamage": 4, "enemyReward": 11, "attackIntervalMs": 880, "delayAfterMs": 3600 },
+      { "count": 18, "spawnIntervalMs": 720, "enemyHp": 208, "enemySpeed": 84, "touchDamage": 4, "enemyReward": 12, "attackIntervalMs": 840, "delayAfterMs": 3400 },
+      { "count": 20, "spawnIntervalMs": 690, "enemyHp": 244, "enemySpeed": 87, "touchDamage": 5, "enemyReward": 13, "attackIntervalMs": 800, "delayAfterMs": 3200 },
+      { "count": 22, "spawnIntervalMs": 660, "enemyHp": 286, "enemySpeed": 90, "touchDamage": 5, "enemyReward": 14, "attackIntervalMs": 760, "delayAfterMs": 3000 },
+      { "count": 24, "spawnIntervalMs": 630, "enemyHp": 334, "enemySpeed": 93, "touchDamage": 6, "enemyReward": 15, "attackIntervalMs": 720, "delayAfterMs": 2800 },
+      { "count": 26, "spawnIntervalMs": 600, "enemyHp": 388, "enemySpeed": 96, "touchDamage": 7, "enemyReward": 16, "attackIntervalMs": 680, "delayAfterMs": 2600 },
+      { "count": 30, "spawnIntervalMs": 560, "enemyHp": 450, "enemySpeed": 100, "touchDamage": 8, "enemyReward": 18, "attackIntervalMs": 620, "delayAfterMs": 0 }
+    ],
+    "type": "json",
+    "label": "波次配置"
+  }
+}
