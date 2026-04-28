@@ -194,6 +194,7 @@ export function ensureUiLayerStyles(doc = document) {
         2px 2px 0 rgba(255, 255, 255, 0.98),
         0 6px 18px rgba(255, 159, 67, 0.28);
       text-align: center;
+      animation: snake-endscreen-bounce 1.15s ease-in-out infinite;
     }
 
     .snake-endscreen-board-title {
@@ -315,6 +316,15 @@ export function ensureUiLayerStyles(doc = document) {
 
       .snake-endscreen-panel {
         padding: 18px 16px 16px;
+      }
+    }
+
+    @keyframes snake-endscreen-bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-8px);
       }
     }
   `;

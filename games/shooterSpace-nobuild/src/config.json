@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "id": "shooter-space",
+    "title": "雷霆战机",
+    "description": "纵版飞机大战，原生 Canvas + JavaScript，无构建依赖。"
+  },
+  "world": {
+    "width": 480,
+    "height": 800,
+    "padding": 24
+  },
+  "player": {
+    "width": 46,
+    "height": 60,
+    "speed": 360,
+    "pointerFollowLerp": 12,
+    "autoFireInterval": 0.18,
+    "maxFirepowerLevel": 3,
+    "maxHealth": 6,
+    "invulnerabilityDuration": 0.42
+  },
+  "bullet": {
+    "width": 8,
+    "height": 20,
+    "speed": 720,
+    "spreadVelocityX": 180
+  },
+  "enemy": {
+    "width": 42,
+    "height": 56,
+    "baseHealth": 1,
+    "waveHealthBonus": 0.2,
+    "contactDamage": 2,
+    "baseSpawnInterval": 0.82,
+    "spawnIntervalFloor": 0.32,
+    "difficultyRamp": 0.018,
+    "minSpeed": 140,
+    "maxSpeed": 260,
+    "driftAmplitudeMin": 12,
+    "driftAmplitudeMax": 42,
+    "driftFrequencyMin": 1.4,
+    "driftFrequencyMax": 2.8,
+    "scoreMin": 20,
+    "scoreMax": 55
+  },
+  "powerUp": {
+    "width": 26,
+    "height": 26,
+    "speed": 140,
+    "value": 1,
+    "dropChance": 0.2,
+    "bossDropCount": 2,
+    "color": "#fde047"
+  },
+  "wave": {
+    "intervalSeconds": 10,
+    "enemySpeedRamp": 0.14,
+    "enemyCountRamp": 0.5
+  },
+  "boss": {
+    "spawnIntervalSeconds": 30,
+    "width": 176,
+    "height": 118,
+    "baseHealth": 42,
+    "waveHealthBonus": 0.22,
+    "moveSpeed": 140,
+    "bulletSpeed": 220,
+    "bulletInterval": 1.12,
+    "bulletIntervalMin": 0.68,
+    "patternInterval": 6,
+    "scoreReward": 600
+  },
+  "background": {
+    "scrollSpeed": 130,
+    "starCountNear": 54,
+    "starCountFar": 80,
+    "gridSpacing": 48
+  },
+  "ui": {
+    "scoreLabel": "SCORE",
+    "fireLabel": "FIRE",
+    "waveLabel": "WAVE",
+    "bossLabel": "BOSS",
+    "gameOverTitle": "任务失败",
+    "gameOverSubtitle": "敌机突破防线，点击屏幕或按 Enter / R 重新出击"
+  },
+  "fighters": [
+    {
+      "id": "storm",
+      "name": "风暴之矛",
+      "image": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/1601377236c04c8a9d0574fb251164fa.png",
+      "tailFlame": {
+       "theme": "red",
+        "width": 26,
+        "height": 128,
+        "minLength": 56,
+        "maxLength": 78
+      },
+      "bullet": {
+        "primaryColor": "#fef08a",
+        "secondaryColor": "#f59e0b",
+        "width": 16,
+        "height": 28
+      },
+      "attackModes": [
+        {
+          "label": "A",
+          "base": "dual",
+          "modifiers": ["trail"],
+          "fireInterval": 0.16
+        },
+        {
+          "label": "B",
+          "base": "spread",
+          "modifiers": ["wave", "trail"],
+          "fireInterval": 0.18
+        },
+        {
+          "label": "C",
+          "base": "laser",
+          "modifiers": ["trail"],
+          "fireInterval": 0.24,
+          "widthGrowth": 8
+        }
+      ],
+      "imageSvg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop stop-color='#ffffff'/><stop offset='1' stop-color='#cbd5e1'/></linearGradient></defs><path d='M64 12 L80 42 L92 72 L64 112 L36 72 L48 42 Z' fill='url(#g)' opacity='0.96'/><path d='M24 58 L48 48 L44 74 L24 82 Z' fill='#ffffff' opacity='0.78'/><path d='M104 58 L80 48 L84 74 L104 82 Z' fill='#ffffff' opacity='0.78'/><rect x='58' y='34' width='12' height='40' rx='6' fill='#ffffff'/></svg>"
+    },
+    {
+      "id": "ember",
+      "name": "赤焰突袭",
+      "image": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/122d42cbb1244199a3b7f4f8776b3457.png",
+      "tailFlame": {
+        "theme": "blue",
+        "width": 26,
+        "height": 124,
+        "minLength": 54,
+        "maxLength": 76
+        
+      },
+      "bullet": {
+        "primaryColor": "#fdba74",
+        "secondaryColor": "#fb7185",
+        "width": 16,
+        "height": 28
+      },
+      "attackModes": [
+        {
+          "label": "A",
+          "base": "dual",
+          "modifiers": ["trail"],
+          "fireInterval": 0.15
+        },
+        {
+          "label": "B",
+          "base": "spread",
+          "modifiers": ["wave", "trail"],
+          "fireInterval": 0.18
+        },
+        {
+          "label": "C",
+          "base": "laser",
+          "modifiers": ["trail"],
+          "fireInterval": 0.22,
+          "widthGrowth": 10
+        }
+      ],
+      "imageSvg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop stop-color='#ffffff'/><stop offset='1' stop-color='#fecaca'/></linearGradient></defs><path d='M64 10 L84 44 L96 78 L64 114 L32 78 L44 44 Z' fill='url(#g)' opacity='0.96'/><path d='M16 56 L50 46 L42 78 L16 88 Z' fill='#ffffff' opacity='0.76'/><path d='M112 56 L78 46 L86 78 L112 88 Z' fill='#ffffff' opacity='0.76'/><rect x='58' y='28' width='12' height='46' rx='6' fill='#fff7ed'/></svg>"
+    },
+    {
+      "id": "nova",
+      "name": "极光幻翼",
+      "image": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/216349dc2b9d4557b5ad03ac6e55b32b.png",
+      "tailFlame": {
+        "theme": "green",
+        "width": 26,
+        "height": 126,
+        "minLength": 53,
+        "maxLength": 75
+      },
+      "bullet": {
+        "primaryColor": "#ddd6fe",
+        "secondaryColor": "#a78bfa",
+        "width": 16,
+        "height": 28
+      },
+      "attackModes": [
+        {
+          "label": "A",
+          "base": "dual",
+          "modifiers": ["tracking", "trail"],
+          "fireInterval": 0.17
+        },
+        {
+          "label": "B",
+          "base": "spread",
+          "modifiers": ["wave"],
+          "fireInterval": 0.2
+        },
+        {
+          "label": "C",
+          "base": "laser",
+          "modifiers": ["tracking", "trail"],
+          "fireInterval": 0.25,
+          "widthGrowth": 9
+        }
+      ],
+      "imageSvg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop stop-color='#ffffff'/><stop offset='1' stop-color='#ddd6fe'/></linearGradient></defs><path d='M64 12 L76 34 L88 60 L64 112 L40 60 L52 34 Z' fill='url(#g)' opacity='0.96'/><path d='M20 62 L50 42 L48 82 L20 92 Z' fill='#ffffff' opacity='0.72'/><path d='M108 62 L78 42 L80 82 L108 92 Z' fill='#ffffff' opacity='0.72'/><rect x='58' y='30' width='12' height='38' rx='6' fill='#ffffff'/></svg>"
+    },
+    {
+      "id": "phantom",
+      "name": "影刃掠空",
+      "image": "https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/c85c0ea07e904ccc88e708badba37ae3.png",
+      "tailFlame": {
+        "theme": "yellow",
+        "width": 26,
+        "height": 130,
+        "minLength": 57,
+        "maxLength": 80
+      },
+      "bullet": {
+        "primaryColor": "#e0f2fe",
+        "secondaryColor": "#93c5fd",
+        "width": 16,
+        "height": 28
+      },
+      "attackModes": [
+        {
+          "label": "A",
+          "base": "dual",
+          "modifiers": ["rotate"],
+          "fireInterval": 0.16
+        },
+        {
+          "label": "B",
+          "base": "spread",
+          "modifiers": ["rotate", "wave"],
+          "fireInterval": 0.19
+        },
+        {
+          "label": "C",
+          "base": "laser",
+          "modifiers": ["tracking", "trail"],
+          "fireInterval": 0.24,
+          "widthGrowth": 8
+        }
+      ],
+      "imageSvg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='0' y1='0' y2='1'><stop stop-color='#ffffff'/><stop offset='1' stop-color='#bfdbfe'/></linearGradient></defs><path d='M64 10 L82 40 L90 72 L64 114 L38 72 L46 40 Z' fill='url(#g)' opacity='0.96'/><path d='M18 60 L52 50 L44 78 L18 88 Z' fill='#ffffff' opacity='0.68'/><path d='M110 60 L76 50 L84 78 L110 88 Z' fill='#ffffff' opacity='0.68'/><rect x='58' y='26' width='12' height='42' rx='6' fill='#eff6ff'/></svg>"
+    }
+  ]
+}

@@ -975,7 +975,7 @@ function handleSlotTap(runtime, slotId, kernel) {
 }
 
 function createText(fontSize, fill, fontWeight) {
-  return new PIXI.Text({
+  const text = new PIXI.Text({
     text: "",
     style: new PIXI.TextStyle({
       fontFamily: "Arial",
@@ -984,6 +984,8 @@ function createText(fontSize, fill, fontWeight) {
       fill,
     }),
   });
+  text.eventMode = "none";
+  return text;
 }
 
 function bindOverlayButtonFeedback(button, label) {

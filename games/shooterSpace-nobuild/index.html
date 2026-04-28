@@ -1,0 +1,1807 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>雷霆战机</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+
+      body {
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        font-family:
+          Inter,
+          "Microsoft YaHei",
+          "PingFang SC",
+          system-ui,
+          sans-serif;
+      }
+
+      .ui-glow {
+        text-shadow:
+          0 0 10px rgba(255, 255, 255, 0.7),
+          0 0 18px rgba(125, 211, 252, 0.65),
+          0 0 36px rgba(34, 211, 238, 0.32);
+      }
+
+      .blink-alpha {
+        animation: startBlink 1s infinite;
+      }
+
+      .scanline-layer {
+        background:
+          linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(125, 211, 252, 0.22) 48%,
+            rgba(255, 255, 255, 0) 100%
+          ),
+          repeating-linear-gradient(
+            to bottom,
+            rgba(148, 163, 184, 0.03) 0px,
+            rgba(148, 163, 184, 0.03) 1px,
+            rgba(2, 6, 23, 0) 2px,
+            rgba(2, 6, 23, 0) 6px
+          );
+        background-size: 100% 22%, 100% 6px;
+        background-repeat: no-repeat, repeat;
+        animation: scanlineMove 3s linear infinite;
+        mix-blend-mode: screen;
+        opacity: 0.85;
+      }
+
+      .hud-frame {
+        box-shadow:
+          inset 0 0 0 1px rgba(125, 211, 252, 0.22),
+          0 0 28px rgba(14, 165, 233, 0.16);
+        backdrop-filter: blur(8px);
+      }
+
+      .ship-card {
+        position: relative;
+        width: 9rem;
+        height: 11.5rem;
+        overflow: visible;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.42);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(18px) saturate(140%);
+        transition:
+          transform 180ms ease,
+          border-color 180ms ease,
+          box-shadow 180ms ease,
+          background-color 180ms ease;
+      }
+
+      .ship-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(
+            155deg,
+            rgba(255, 255, 255, 0.18) 0%,
+            rgba(255, 255, 255, 0) 34%
+          );
+        pointer-events: none;
+      }
+
+      .ship-card:hover {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.72);
+        box-shadow:
+          0 0 18px rgba(255, 255, 255, 0.35),
+          0 0 42px rgba(255, 255, 255, 0.18);
+      }
+
+      .ship-card.is-selected {
+        border-color: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 0 20px rgba(255, 255, 255, 0.6),
+          0 0 60px rgba(255, 255, 255, 0.3);
+      }
+
+      .ship-card img {
+        filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.28));
+      }
+
+      .ship-card-inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        height: 60px;
+        width: 50px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .ship-visual {
+        position: relative;
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        min-height: 7.5rem;
+        padding-top: 0.25rem;
+        overflow: hidden;
+      }
+
+      .ship-image {
+        position: relative;
+        z-index: 2;
+      }
+
+      .ship-flame-canvas {
+        position: absolute;
+        left: 50%;
+        top: 58%;
+        z-index: 1;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+
+      .detail-panel {
+        backdrop-filter: blur(16px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 0 36px rgba(255, 255, 255, 0.12);
+      }
+
+      .demo-stack {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        pointer-events: none;
+      }
+
+      .mode-block {
+        position: relative;
+        flex: 1;
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background:
+          radial-gradient(circle at center, rgba(255, 255, 255, 0.06), transparent 56%),
+          linear-gradient(180deg, rgba(6, 12, 24, 0.86), rgba(15, 23, 42, 0.42));
+        transition:
+          border-color 180ms ease,
+          box-shadow 180ms ease,
+          background-color 180ms ease;
+      }
+
+      .mode-block:last-child {
+        border-bottom: 0;
+      }
+
+      .mode-block.is-active {
+        box-shadow:
+          inset 0 0 0 1px rgba(103, 232, 249, 0.18),
+          inset 0 0 30px rgba(34, 211, 238, 0.08);
+      }
+
+      .mode-block.mode-b.is-active {
+        box-shadow:
+          inset 0 0 0 1px rgba(244, 114, 182, 0.2),
+          inset 0 0 30px rgba(236, 72, 153, 0.1);
+      }
+
+      .mode-label-chip {
+        position: absolute;
+        top: 12px;
+        left: 16px;
+        z-index: 3;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(2, 6, 23, 0.56);
+        padding: 0.4rem 0.75rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        text-shadow: 0 0 12px currentColor;
+      }
+
+      .mode-block.mode-a .mode-label-chip {
+        color: #67e8f9;
+      }
+
+      .mode-block.mode-b .mode-label-chip {
+        color: #f9a8d4;
+      }
+
+      .ship-wrap {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: flex;
+        height: 188px;
+        width: 204px;
+        transform: translate(-50%, -50%);
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .ship-img {
+        position: relative;
+        z-index: 2;
+        width: 70px;
+        height: 70px;
+        object-fit: contain;
+        filter:
+          drop-shadow(0 12px 20px rgba(0, 0, 0, 0.42))
+          drop-shadow(0 0 18px rgba(255, 255, 255, 0.22));
+      }
+
+      .flame-canvas {
+        position: absolute;
+        left: 50%;
+        top: 55%;
+        z-index: 1;
+        width: 28px;
+        height: 132px;
+        transform: translateX(-50%);
+        pointer-events: none;
+      }
+
+      .bullet-layer {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 3;
+        width: 320px;
+        height: 360px;
+        transform: translate(-50%, -50%);
+        overflow: visible;
+        pointer-events: none;
+      }
+
+      .bullet {
+        position: absolute;
+        left: 50%;
+        bottom: 128px;
+        width: var(--bullet-width, 4px);
+        height: var(--bullet-height, 12px);
+        border-radius: 999px;
+        background: var(--bullet-color, cyan);
+        box-shadow:
+          0 0 10px var(--bullet-color, cyan),
+          0 0 18px color-mix(in srgb, var(--bullet-color, cyan) 72%, white 28%);
+        opacity: 0.96;
+        transform: translate3d(-50%, 0, 0);
+        animation: detailShoot var(--bullet-duration, 0.6s) linear forwards;
+      }
+
+      @keyframes detailShoot {
+        from {
+          opacity: 1;
+          transform: translate3d(-50%, 0, 0) scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: translate3d(
+              calc(-50% + var(--bullet-drift-x, 0px)),
+              var(--bullet-travel-y, -300px),
+              0
+            )
+            scale(0.88);
+        }
+      }
+
+      .light-select-title {
+        text-shadow:
+          0 0 10px rgba(255, 255, 255, 0.7),
+          0 0 24px rgba(255, 255, 255, 0.26);
+      }
+
+      .ui-button-glow {
+        box-shadow:
+          0 0 0 1px rgba(125, 211, 252, 0.2),
+          0 0 22px rgba(34, 211, 238, 0.16),
+          inset 0 0 18px rgba(15, 23, 42, 0.2);
+      }
+
+      .guide-overlay.is-active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .guide-page {
+        transition:
+          opacity 260ms ease,
+          visibility 260ms ease;
+      }
+
+      .guide-page.is-active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .guide-page.is-inactive {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .guide-panel {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 0 40px rgba(0, 200, 255, 0.2),
+          0 0 90px rgba(14, 165, 233, 0.08);
+      }
+
+      .guide-panel::before,
+      .guide-panel::after {
+        content: "";
+        position: absolute;
+        width: 58px;
+        height: 58px;
+        border: 1px solid rgba(103, 232, 249, 0.38);
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      .guide-panel::before {
+        top: 14px;
+        left: 14px;
+        border-right: 0;
+        border-bottom: 0;
+        border-radius: 18px 0 0 0;
+      }
+
+      .guide-panel::after {
+        right: 14px;
+        bottom: 14px;
+        border-left: 0;
+        border-top: 0;
+        border-radius: 0 0 18px 0;
+      }
+
+      .guide-panel-enter {
+        animation: guidePanelEnter 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      .guide-fade-in {
+        animation: guideFadeIn 420ms ease forwards;
+      }
+
+      .guide-row-enter {
+        animation: guideRowEnter 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      .guide-controls {
+        min-height: 40px;
+      }
+
+      .guide-key {
+        min-width: 40px;
+        min-height: 40px;
+      }
+
+      .animation-delay-100 {
+        animation-delay: 100ms;
+      }
+
+      .animation-delay-150 {
+        animation-delay: 150ms;
+      }
+
+      .animation-delay-200 {
+        animation-delay: 200ms;
+      }
+
+      .animation-delay-250 {
+        animation-delay: 250ms;
+      }
+
+      .animation-delay-300 {
+        animation-delay: 300ms;
+      }
+
+      .animation-delay-350 {
+        animation-delay: 350ms;
+      }
+
+      .animation-delay-400 {
+        animation-delay: 400ms;
+      }
+
+      .animation-delay-450 {
+        animation-delay: 450ms;
+      }
+
+      .animation-delay-500 {
+        animation-delay: 500ms;
+      }
+
+      .animation-delay-550 {
+        animation-delay: 550ms;
+      }
+
+      .animation-delay-600 {
+        animation-delay: 600ms;
+      }
+
+      .animation-delay-650 {
+        animation-delay: 650ms;
+      }
+
+      .animation-delay-700 {
+        animation-delay: 700ms;
+      }
+
+      .animation-delay-750 {
+        animation-delay: 750ms;
+      }
+
+      .animation-delay-800 {
+        animation-delay: 800ms;
+      }
+
+      @keyframes startBlink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes scanlineMove {
+        0% {
+          background-position:
+            0 -35%,
+            0 0;
+        }
+
+        100% {
+          background-position:
+            0 135%,
+            0 0;
+        }
+      }
+
+      @keyframes guidePanelEnter {
+        from {
+          opacity: 0;
+          transform: translateY(18px) scale(0.96);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes guideFadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes guideRowEnter {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="text-white">
+    <main class="relative min-h-screen min-h-dvh w-full overflow-hidden bg-black">
+      <img
+        src="https://ppy-test.tos-cn-beijing.volces.com/2ab27292-cb78-4db0-aded-48767b4970d7/fb0895ad9f7745ffa76d1cd012bfcfbb.jpg"
+        alt="雷霆战机背景图"
+        class="absolute inset-0 h-full w-full object-cover pointer-events-none"
+      />
+      <div class="absolute inset-0 bg-slate-950/35 pointer-events-none"></div>
+      <div class="scanline-layer absolute inset-0 pointer-events-none"></div>
+      <div
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_bottom,rgba(168,85,247,0.16),transparent_28%)]"
+      ></div>
+
+      <section
+        id="start-screen"
+        class="absolute inset-0 flex cursor-pointer flex-col items-center justify-end bg-black/50"
+      >
+        <div class="flex h-full w-full flex-col items-center justify-center pointer-events-none px-6 text-center">
+          <p class="mb-4 text-sm uppercase tracking-[0.8em] text-cyan-300/80">
+            Thunder Fighter
+          </p>
+          <h1 class="ui-glow text-4xl font-black tracking-[0.35em] text-white sm:text-6xl">
+            雷霆战机
+          </h1>
+          <p class="mt-5 max-w-md text-sm leading-7 text-slate-200/75 sm:text-base">
+            高能空域已锁定，进入作战频道后选择你的专属战机。
+          </p>
+          <button
+            type="button"
+            aria-label="点击屏幕开始"
+            class="blink-alpha ui-glow mt-16 bg-transparent px-6 py-3 text-xl font-semibold text-white tracking-[0.45em] sm:text-2xl"
+          >
+            点击屏幕开始
+          </button>
+          <p class="mt-4 text-xs tracking-[0.35em] text-slate-300/60">
+            TOUCH TO DEPLOY
+          </p>
+        </div>
+      </section>
+
+      <section
+        id="select-screen"
+        class="absolute inset-0 hidden items-center justify-center overflow-hidden bg-slate-950/45 px-4 py-6 sm:px-6"
+      >
+        <div
+          class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.14),transparent_30%),radial-gradient(circle_at_bottom,rgba(255,255,255,0.08),transparent_32%)]"
+        ></div>
+        <div class="scanline-layer pointer-events-none absolute inset-0 opacity-30"></div>
+
+        <div class="relative z-10 mx-auto flex w-full max-w-[min(92vw,34rem)] flex-col items-center justify-center px-4 sm:px-6">
+          <p class="pointer-events-none text-xs uppercase tracking-[0.8em] text-white/60">Fighter Select</p>
+          <h2
+            id="select-title"
+            class="light-select-title pointer-events-none mt-4 text-center text-4xl font-black tracking-[0.28em] text-white sm:text-5xl"
+          >
+            选择战机
+          </h2>
+          <p
+            id="select-subtitle"
+            class="pointer-events-none mt-4 text-center text-sm uppercase tracking-[0.36em] text-white/55"
+          >
+            Tap to lock / tap again to start
+          </p>
+
+          <div id="ship-grid" class="mt-8 grid w-full grid-cols-2 gap-4 sm:mt-10 sm:gap-6">
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="detail-screen"
+        class="absolute inset-0 hidden items-center justify-center overflow-hidden bg-slate-950/55 px-4 py-6 sm:px-6"
+      >
+        <div
+          class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_28%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.14),transparent_32%)]"
+        ></div>
+        <div class="scanline-layer pointer-events-none absolute inset-0 opacity-28"></div>
+
+        <div
+          class="detail-panel relative z-10 flex w-full max-w-[min(94vw,34rem)] flex-col rounded-[28px] border border-white/15 bg-black/38 p-4 sm:p-5"
+        >
+          <div class="mb-4 border-b border-white/10 pb-4">
+            <h2
+              id="detail-ship-name"
+              class="text-center text-2xl font-black tracking-[0.18em] text-white sm:text-3xl"
+            >
+              风暴之矛
+            </h2>
+          </div>
+
+          <div class="rounded-[24px] border border-white/10 bg-black/28 p-2 sm:p-3">
+            <div class="relative h-[min(58vh,520px)] min-h-[420px] overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,rgba(2,6,23,0.88),rgba(15,23,42,0.68))]">
+              <div id="detail-demo-stack" class="demo-stack">
+                <div id="mode-a" class="mode-block mode-a"></div>
+                <div id="mode-b" class="mode-block mode-b"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+            <button
+              id="detail-back-button"
+              type="button"
+              class="min-h-[46px] flex-1 rounded-2xl border border-white/15 bg-white/[0.04] px-5 py-3 text-sm font-semibold tracking-[0.24em] text-white transition hover:bg-white/[0.08]"
+            >
+              返回选择
+            </button>
+            <button
+              id="detail-deploy-button"
+              type="button"
+              class="ui-glow min-h-[46px] flex-1 rounded-2xl border border-cyan-300/35 bg-cyan-400/10 px-5 py-3 text-sm font-bold tracking-[0.28em] text-white transition hover:bg-cyan-400/16"
+            >
+              选择出击
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="battle-screen"
+        class="absolute inset-0 hidden bg-slate-950/70"
+      >
+        <div class="absolute inset-0 bg-black/35"></div>
+        <div
+          id="app"
+          class="relative z-10 h-full w-full min-h-screen min-h-dvh px-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+        ></div>
+      </section>
+
+      <section
+        id="guide-overlay"
+        class="guide-overlay invisible absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-950/18 opacity-0 pointer-events-none transition-opacity duration-300"
+      >
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-[8px]"></div>
+        <div class="scanline-layer absolute inset-0 opacity-70"></div>
+
+        <div class="absolute inset-0 flex items-center justify-center px-4 pointer-events-none">
+          <div
+            id="guide-panel"
+            class="guide-panel guide-panel-enter relative pointer-events-auto w-full max-w-md rounded-2xl border border-white/20 bg-black/40 px-6 py-8 backdrop-blur-md shadow-[0_0_40px_rgba(0,200,255,0.2)]"
+          >
+            <div class="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent"></div>
+            <div class="pointer-events-none absolute inset-x-10 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-300/45 to-transparent"></div>
+
+            <div class="grid">
+              <div
+                id="guide-page-1"
+                class="guide-page is-active col-start-1 row-start-1"
+              >
+                <div class="guide-fade-in text-center opacity-0">
+                  <p class="text-[11px] uppercase tracking-[0.7em] text-cyan-300/65">
+                    FLIGHT BRIEFING
+                  </p>
+                  <h2 class="ui-glow mt-3 text-3xl font-black tracking-[0.32em] text-white sm:text-4xl">
+                    操作说明
+                  </h2>
+                  <p class="mt-3 text-xs uppercase tracking-[0.45em] text-slate-300/50">
+                    Combat Interface Guide
+                  </p>
+                </div>
+
+                <div class="mt-8 space-y-4">
+                  <div class="guide-row-enter animation-delay-150 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 opacity-0">
+                    <div class="mb-3 text-[11px] uppercase tracking-[0.45em] text-cyan-300/60">
+                      Movement
+                    </div>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">触摸移动</span>
+                        <div class="guide-controls inline-flex items-center rounded-md border border-white/30 bg-black/60 px-3 text-xs tracking-[0.2em] text-cyan-100 shadow-inner shadow-cyan-400/10">
+                          滑动
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">鼠标拖动</span>
+                        <div class="guide-controls inline-flex items-center rounded-md border border-white/30 bg-black/60 px-3 text-xs tracking-[0.2em] text-cyan-100 shadow-inner shadow-cyan-400/10">
+                          拖动
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">键盘控制</span>
+                        <div class="guide-controls flex flex-wrap justify-end gap-2">
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">W</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">A</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">S</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">D</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">↑</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">←</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">↓</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">→</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="guide-row-enter animation-delay-300 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 opacity-0">
+                    <div class="mb-3 text-[11px] uppercase tracking-[0.45em] text-cyan-300/60">
+                      Actions
+                    </div>
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">模式切换</span>
+                        <div class="guide-controls flex flex-wrap justify-end gap-2">
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">J</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">滑动</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">释放炸弹</span>
+                        <div class="guide-controls flex flex-wrap justify-end gap-2">
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">K</span>
+                          <span class="guide-key inline-flex items-center justify-center rounded-md border border-white/30 bg-black/60 px-3 text-xs text-white shadow-inner shadow-cyan-400/10">点击</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">暂停游戏</span>
+                        <div class="guide-controls inline-flex items-center rounded-md border border-white/30 bg-black/60 px-3 text-xs tracking-[0.2em] text-cyan-100 shadow-inner shadow-cyan-400/10">
+                          ESC
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between gap-4">
+                        <span class="text-sm tracking-[0.2em] text-slate-100">确认操作</span>
+                        <div class="guide-controls inline-flex items-center rounded-md border border-white/30 bg-black/60 px-3 text-xs tracking-[0.2em] text-cyan-100 shadow-inner shadow-cyan-400/10">
+                          ENTER
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                id="guide-page-2"
+                class="guide-page is-inactive col-start-1 row-start-1"
+              >
+                <div class="guide-fade-in text-center opacity-0">
+                  <p class="text-[11px] uppercase tracking-[0.7em] text-cyan-300/65">
+                    TACTICAL ADVICE
+                  </p>
+                  <h2 class="ui-glow mt-3 text-3xl font-black tracking-[0.32em] text-white sm:text-4xl">
+                    游戏建议
+                  </h2>
+                  <p class="mt-3 text-xs uppercase tracking-[0.45em] text-slate-300/50">
+                    Survival Protocol
+                  </p>
+                </div>
+
+                <div class="mt-8 space-y-3">
+                  <div class="guide-row-enter animation-delay-200 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 opacity-0">
+                    <div class="flex items-start justify-between gap-4">
+                      <span class="ui-glow text-lg font-black tracking-[0.3em] text-cyan-200">01</span>
+                      <div class="flex-1">
+                        <div class="text-sm tracking-[0.18em] text-slate-100">调高亮度</div>
+                        <p class="mt-1 text-sm leading-6 text-slate-300/72">
+                          保持画面清晰，方便观察敌弹轨迹和掉落物位置。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="guide-row-enter animation-delay-350 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 opacity-0">
+                    <div class="flex items-start justify-between gap-4">
+                      <span class="ui-glow text-lg font-black tracking-[0.3em] text-cyan-200">02</span>
+                      <div class="flex-1">
+                        <div class="text-sm tracking-[0.18em] text-slate-100">使用微信打开</div>
+                        <p class="mt-1 text-sm leading-6 text-slate-300/72">
+                          移动端建议使用系统兼容更好的容器环境，触控表现更稳定。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="guide-row-enter animation-delay-500 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 opacity-0">
+                    <div class="flex items-start justify-between gap-4">
+                      <span class="ui-glow text-lg font-black tracking-[0.3em] text-cyan-200">03</span>
+                      <div class="flex-1">
+                        <div class="text-sm tracking-[0.18em] text-slate-100">判定点提示</div>
+                        <p class="mt-1 text-sm leading-6 text-slate-300/72">
+                          记住战机中心区域才是核心判定点，边缘擦弹更安全。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="guide-row-enter animation-delay-650 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 opacity-0">
+                    <div class="flex items-start justify-between gap-4">
+                      <span class="ui-glow text-lg font-black tracking-[0.3em] text-cyan-200">04</span>
+                      <div class="flex-1">
+                        <div class="text-sm tracking-[0.18em] text-slate-100">坚持到最后</div>
+                        <p class="mt-1 text-sm leading-6 text-slate-300/72">
+                          后期密度更高，但奖励也更丰厚，保持节奏就有机会反超。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 flex items-center justify-between gap-4 border-t border-white/10 pt-5">
+              <div
+                id="guide-page-indicator"
+                class="text-xs uppercase tracking-[0.45em] text-slate-300/65"
+              >
+                1/2
+              </div>
+              <button
+                id="guide-action-button"
+                type="button"
+                class="ui-glow rounded-xl border border-cyan-300/35 bg-cyan-400/10 px-5 py-3 text-sm font-bold tracking-[0.35em] text-white shadow-[0_0_24px_rgba(0,200,255,0.14)] transition duration-200 hover:border-cyan-200/60 hover:bg-cyan-400/18 hover:shadow-[0_0_28px_rgba(56,189,248,0.3)]"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { bootstrap } from "./src/main.js";
+
+      const gameConfigUrl = new URL("./src/config.json", window.location.href);
+
+      async function loadGameConfig() {
+        try {
+          const response = await fetch(gameConfigUrl);
+          if (!response.ok) {
+            throw new Error(`Failed to load game config: ${response.status}`);
+          }
+
+          return await response.json();
+        } catch (error) {
+          console.warn("[shooterSpace] Failed to load game config.", error);
+          return null;
+        }
+      }
+
+      function resolveFighterImageSource(fighter) {
+        const linkedImage =
+          fighter.image ??
+          fighter.imageUrl ??
+          fighter.imageSrc ??
+          fighter.asset ??
+          "";
+
+        if (typeof linkedImage === "string" && linkedImage.trim()) {
+          return new URL(linkedImage, gameConfigUrl).href;
+        }
+
+        if (typeof fighter.imageSvg === "string" && fighter.imageSvg.trim()) {
+          return `data:image/svg+xml;utf8,${encodeURIComponent(fighter.imageSvg)}`;
+        }
+
+        return "";
+      }
+
+      function resolveFighterBulletSource(fighter) {
+        const bulletConfig = fighter?.bullet ?? {};
+        const linkedBullet =
+          bulletConfig.image ??
+          bulletConfig.imageUrl ??
+          bulletConfig.imageSrc ??
+          bulletConfig.asset ??
+          "";
+
+        if (typeof linkedBullet === "string" && linkedBullet.trim()) {
+          return new URL(linkedBullet, gameConfigUrl).href;
+        }
+
+        return "";
+      }
+
+      const TAIL_FLAME_THEMES = {
+        blue: {
+          core: "rgba(255,255,255,0.96)",
+          mid: "rgba(59,130,246,0.92)",
+          glow: "rgba(96,165,250,0.34)"
+        },
+        red: {
+          core: "rgba(255,255,255,0.96)",
+          mid: "rgba(239,68,68,0.92)",
+          glow: "rgba(248,113,113,0.34)"
+        },
+        green: {
+          core: "rgba(255,255,255,0.96)",
+          mid: "rgba(34,197,94,0.9)",
+          glow: "rgba(74,222,128,0.34)"
+        },
+        yellow: {
+          core: "rgba(255,255,255,0.96)",
+          mid: "rgba(250,204,21,0.94)",
+          glow: "rgba(253,224,71,0.34)"
+        }
+      };
+
+      function randomBetween(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function colorToRgba(color, alpha) {
+        if (typeof color !== "string" || !color.trim()) {
+          return `rgba(255,255,255,${alpha})`;
+        }
+
+        if (color.startsWith("#")) {
+          let hex = color.slice(1);
+          if (hex.length === 3) {
+            hex = hex
+              .split("")
+              .map((part) => part + part)
+              .join("");
+          }
+
+          if (hex.length === 6) {
+            const value = Number.parseInt(hex, 16);
+            const r = (value >> 16) & 255;
+            const g = (value >> 8) & 255;
+            const b = value & 255;
+            return `rgba(${r},${g},${b},${alpha})`;
+          }
+        }
+
+        return color;
+      }
+
+      function renderTailFlameFrame(flameState, theme, timeSeconds, deltaSeconds) {
+        const { ctx, width, height, minLength, maxLength, seed } = flameState;
+        const particles = flameState.particles ?? (flameState.particles = []);
+        const t = timeSeconds + seed;
+        const centerX = width / 2 + Math.sin(t * 3.8) * Math.max(0.8, width * 0.04);
+        const startY = Math.max(6, height * 0.07);
+        const baseLength = (minLength + maxLength) / 2;
+        const flameLength =
+          baseLength +
+          Math.sin(t * 9.6) * Math.max(4, (maxLength - minLength) * 0.35) +
+          Math.cos(t * 13.4) * Math.max(2, (maxLength - minLength) * 0.12);
+        const endY = Math.min(height - 8, startY + flameLength);
+        const alpha = 0.8 + Math.sin(t * 11.5) * 0.08;
+        const topHalfWidth = Math.max(width * 0.24, width * 0.34 + Math.sin(t * 8.4) * (width * 0.04));
+        const midHalfWidth = Math.max(width * 0.16, width * 0.24 + Math.cos(t * 7.2) * (width * 0.03));
+        const tipHalfWidth = Math.max(2.4, width * 0.08 + Math.sin(t * 10.8) * (width * 0.015));
+        const dt = Math.max(1 / 120, Math.min(deltaSeconds || 1 / 60, 1 / 18));
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+
+        const glow = ctx.createRadialGradient(
+          centerX,
+          startY + flameLength * 0.12,
+          2,
+          centerX,
+          startY + flameLength * 0.28,
+          topHalfWidth * 2.3
+        );
+        glow.addColorStop(0, colorToRgba(theme.glow, 0.88));
+        glow.addColorStop(0.45, colorToRgba(theme.glow, 0.24));
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.globalAlpha = alpha * 0.95;
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.ellipse(centerX, startY + flameLength * 0.24, topHalfWidth * 1.18, flameLength * 0.42, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        const outerGradient = ctx.createLinearGradient(centerX, startY, centerX, endY);
+        outerGradient.addColorStop(0, "rgba(255,255,255,0.98)");
+        outerGradient.addColorStop(0.18, theme.core);
+        outerGradient.addColorStop(0.48, theme.mid);
+        outerGradient.addColorStop(0.82, colorToRgba(theme.mid, 0.18));
+        outerGradient.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = outerGradient;
+        ctx.beginPath();
+        ctx.moveTo(centerX - topHalfWidth, startY);
+        ctx.quadraticCurveTo(centerX - midHalfWidth, startY + flameLength * 0.42, centerX - tipHalfWidth, endY);
+        ctx.lineTo(centerX + tipHalfWidth, endY);
+        ctx.quadraticCurveTo(centerX + midHalfWidth, startY + flameLength * 0.42, centerX + topHalfWidth, startY);
+        ctx.closePath();
+        ctx.fill();
+
+        const coreGradient = ctx.createLinearGradient(centerX, startY, centerX, startY + flameLength * 0.72);
+        coreGradient.addColorStop(0, "rgba(255,255,255,1)");
+        coreGradient.addColorStop(0.24, theme.core);
+        coreGradient.addColorStop(0.64, colorToRgba(theme.mid, 0.48));
+        coreGradient.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.globalAlpha = Math.min(1, alpha + 0.08);
+        ctx.fillStyle = coreGradient;
+        ctx.beginPath();
+        ctx.moveTo(centerX - topHalfWidth * 0.42, startY + 1);
+        ctx.quadraticCurveTo(centerX - midHalfWidth * 0.36, startY + flameLength * 0.32, centerX - tipHalfWidth * 0.56, startY + flameLength * 0.8);
+        ctx.lineTo(centerX + tipHalfWidth * 0.56, startY + flameLength * 0.8);
+        ctx.quadraticCurveTo(centerX + midHalfWidth * 0.36, startY + flameLength * 0.32, centerX + topHalfWidth * 0.42, startY + 1);
+        ctx.closePath();
+        ctx.fill();
+
+        const particleCount = Math.floor(Math.random() * 3) + 1;
+        for (let index = 0; index < particleCount; index += 1) {
+          particles.push({
+            x: centerX + randomBetween(-topHalfWidth * 0.18, topHalfWidth * 0.18),
+            y: startY + flameLength * randomBetween(0.56, 0.9),
+            vx: randomBetween(-8, 8),
+            vy: randomBetween(42, 96),
+            size: randomBetween(0.9, 1.9),
+            alpha: randomBetween(0.3, 0.7),
+            life: randomBetween(0.14, 0.26),
+            maxLife: 0
+          });
+          particles[particles.length - 1].maxLife = particles[particles.length - 1].life;
+        }
+
+        while (particles.length > 18) {
+          particles.shift();
+        }
+
+        particles.forEach((particle) => {
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          particle.life -= dt;
+        });
+
+        flameState.particles = particles.filter((particle) => particle.life > 0 && particle.y < height + 10);
+
+        flameState.particles.forEach((particle) => {
+          const particleAlpha = particle.alpha * (particle.life / Math.max(0.0001, particle.maxLife));
+          const spark = ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, particle.size * 4.5);
+          spark.addColorStop(0, colorToRgba(theme.core, particleAlpha));
+          spark.addColorStop(0.45, colorToRgba(theme.mid, particleAlpha * 0.9));
+          spark.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = spark;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size * 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.restore();
+      }
+
+      function getPreviewTailFlameConfig(flameConfig = {}) {
+        const scale = 0.44;
+        return {
+          width: Math.round((flameConfig.width ?? 40) * scale),
+          height: Math.round((flameConfig.height ?? 220) * scale),
+          minLength: Math.round((flameConfig.minLength ?? 118) * scale),
+          maxLength: Math.round((flameConfig.maxLength ?? 156) * scale)
+        };
+      }
+
+      const ATTACK_BASE_LABELS = {
+        single: "single / 单发",
+        spread: "spread / 扇射",
+        laser: "laser / 激光"
+      };
+
+      const ATTACK_MODIFIER_LABELS = {
+        tracking: "tracking / 追踪",
+        rotate: "rotate / 旋转",
+        wave: "wave / 波动",
+        trail: "trail / 尾迹"
+      };
+
+      const DEFAULT_ATTACK_MODES = [
+        { label: "A", base: "single", modifiers: ["trail"], fireInterval: 0.16, modeDuration: 3 },
+        { label: "B", base: "spread", modifiers: ["rotate", "trail"], fireInterval: 0.19, modeDuration: 3 },
+        { label: "C", base: "laser", modifiers: ["wave", "trail"], fireInterval: 0.24, modeDuration: 3 }
+      ];
+
+      function fallbackAttackModeLabel(index) {
+        return String.fromCharCode(65 + index);
+      }
+
+      function normalizeAttackModes(fighter) {
+        const rawModes =
+          Array.isArray(fighter?.attackModes) && fighter.attackModes.length > 0
+            ? fighter.attackModes
+            : DEFAULT_ATTACK_MODES;
+
+        return rawModes.map((mode, index) => ({
+          label: mode?.label ?? fallbackAttackModeLabel(index),
+          base: mode?.base ?? "single",
+          modifiers: Array.isArray(mode?.modifiers) ? mode.modifiers.filter(Boolean) : [],
+          fireInterval:
+            mode?.fireInterval ??
+            (mode?.base === "laser" ? 0.24 : mode?.base === "spread" ? 0.18 : 0.16),
+          modeDuration: mode?.modeDuration ?? 3,
+          count: mode?.count,
+          spreadAngle: mode?.spreadAngle,
+          bulletSpeed: mode?.bulletSpeed,
+          rotateSpeed: mode?.rotateSpeed,
+          waveAmplitude: mode?.waveAmplitude,
+          waveFrequency: mode?.waveFrequency,
+          trackingStrength: mode?.trackingStrength,
+          trailLength: mode?.trailLength
+        }));
+      }
+
+      function formatAttackModeSummary(mode) {
+        const baseLabel = ATTACK_BASE_LABELS[mode.base] ?? mode.base;
+        if (!mode.modifiers.length) {
+          return baseLabel;
+        }
+
+        const modifierLabel = mode.modifiers
+          .map((modifier) => ATTACK_MODIFIER_LABELS[modifier] ?? modifier)
+          .join(" + ");
+        return `${baseLabel} + ${modifierLabel}`;
+      }
+
+      function renderAttackModeList(container, modes, activeIndex) {
+        if (!container) {
+          return;
+        }
+
+        container.innerHTML = modes
+          .map((mode, index) => {
+            const isActive = index === activeIndex;
+            return `
+              <div class="rounded-2xl border px-4 py-3 transition ${
+                isActive
+                  ? "border-cyan-300/30 bg-cyan-400/[0.08] text-cyan-100 shadow-[0_0_24px_rgba(34,211,238,0.18)]"
+                  : "border-white/10 bg-white/[0.03] text-white/75"
+              }">
+                模式 ${mode.label}：${formatAttackModeSummary(mode)}
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      function initShipFlameAnimations(cards, fighters) {
+        const fighterMap = new Map(fighters.map((fighter) => [fighter.id, fighter]));
+        const renderers = [];
+        let lastTime = 0;
+
+        cards.forEach((card) => {
+          const fighter = fighterMap.get(card.dataset.ship);
+          const flameConfig = fighter?.tailFlame;
+          const canvas = card.querySelector(".ship-flame-canvas");
+
+          if (!canvas || !flameConfig) {
+            return;
+          }
+
+          const previewFlame = getPreviewTailFlameConfig(flameConfig);
+          const width = previewFlame.width;
+          const height = previewFlame.height;
+          const dpr = window.devicePixelRatio || 1;
+
+          canvas.width = Math.round(width * dpr);
+          canvas.height = Math.round(height * dpr);
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+
+          const ctx = canvas.getContext("2d");
+          ctx.scale(dpr, dpr);
+
+          const theme =
+            TAIL_FLAME_THEMES[flameConfig.theme] ?? TAIL_FLAME_THEMES.blue;
+          const state = {
+            ctx,
+            width,
+            height,
+            minLength: previewFlame.minLength,
+            maxLength: previewFlame.maxLength,
+            seed: Math.random() * 1000,
+            particles: []
+          };
+
+          renderers.push({ state, theme });
+        });
+
+        function tick(time) {
+          if (!lastTime) {
+            lastTime = time;
+          }
+          const deltaSeconds = Math.min(0.033, (time - lastTime) / 1000);
+          lastTime = time;
+          renderers.forEach((renderer) => {
+            renderTailFlameFrame(renderer.state, renderer.theme, time / 1000, deltaSeconds);
+          });
+          window.requestAnimationFrame(tick);
+        }
+
+        if (renderers.length > 0) {
+          window.requestAnimationFrame(tick);
+        }
+      }
+
+      function createDetailDemoController(rootElement, modeListElement) {
+        const demoModes = [
+          {
+            id: "mode-a",
+            label: "A",
+            base: "single",
+            modifiers: [],
+            bulletOffsets: [0],
+            bulletDrifts: [0],
+            bulletDuration: 0.6
+          },
+          {
+            id: "mode-b",
+            label: "B",
+            base: "spread",
+            modifiers: [],
+            bulletOffsets: [-18, 0, 18],
+            bulletDrifts: [-56, 0, 56],
+            bulletDuration: 0.68
+          }
+        ];
+
+        let rafId = 0;
+        let lastTime = 0;
+        let focusIndex = 0;
+        let focusTimer = 0;
+        let activeShip = null;
+        let blockStates = [];
+
+        function buildModeBlock(blockState) {
+          const shipSrc = resolveFighterImageSource(activeShip?.fighterConfig ?? {});
+          const shipName = activeShip?.fighterConfig?.name ?? activeShip?.name ?? "Fighter";
+
+          blockState.element.innerHTML = `
+            <h3 class="mode-label-chip">模式 ${blockState.mode.label}</h3>
+            <div class="ship-wrap">
+              <img class="ship-img" src="${shipSrc}" alt="${shipName}" draggable="false" />
+              <canvas class="flame-canvas"></canvas>
+              <div class="bullet-layer"></div>
+            </div>
+          `;
+
+          blockState.shipWrap = blockState.element.querySelector(".ship-wrap");
+          blockState.shipImage = blockState.element.querySelector(".ship-img");
+          blockState.flameCanvas = blockState.element.querySelector(".flame-canvas");
+          blockState.bulletLayer = blockState.element.querySelector(".bullet-layer");
+          blockState.ctx = blockState.flameCanvas.getContext("2d");
+          blockState.emitterId = 0;
+          const flameConfig = activeShip?.fighterConfig?.tailFlame ?? {};
+          const previewFlame = getPreviewTailFlameConfig(flameConfig);
+          blockState.flameCanvas.style.width = `${flameConfig.width ?? 40}px`;
+          blockState.flameCanvas.style.width = `${previewFlame.width}px`;
+          blockState.flameCanvas.style.height = `${previewFlame.height}px`;
+          resizeBlockCanvas(blockState);
+        }
+
+        function resizeBlockCanvas(blockState) {
+          if (!blockState?.flameCanvas || !blockState?.ctx) {
+            return;
+          }
+
+          const rect = blockState.flameCanvas.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          blockState.canvasWidth = Math.max(1, Math.round(rect.width));
+          blockState.canvasHeight = Math.max(1, Math.round(rect.height));
+          blockState.flameCanvas.width = Math.round(blockState.canvasWidth * dpr);
+          blockState.flameCanvas.height = Math.round(blockState.canvasHeight * dpr);
+          blockState.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function syncModeLabel() {
+          renderAttackModeList(modeListElement, demoModes, focusIndex);
+
+          blockStates.forEach((blockState, index) => {
+            blockState.element.classList.toggle("is-active", index === focusIndex);
+          });
+        }
+
+        function spawnBullets(blockState) {
+          if (!blockState?.bulletLayer || !activeShip) {
+            return;
+          }
+
+          const bulletConfig = activeShip.fighterConfig?.bullet ?? {};
+          const bulletWidth = Math.max(4, Math.round((bulletConfig.width ?? 16) * 0.28));
+          const bulletHeight = Math.max(12, Math.round((bulletConfig.height ?? 28) * 0.56));
+          const travelY = -(Math.max(260, blockState.bulletLayer.clientHeight - 42));
+          const bulletColor =
+            blockState.mode.label === "A"
+              ? bulletConfig.primaryColor ??
+                activeShip.configOverrides?.player?.theme?.bulletPrimary ??
+                "#67e8f9"
+              : bulletConfig.secondaryColor ??
+                bulletConfig.primaryColor ??
+                activeShip.configOverrides?.player?.theme?.bulletSecondary ??
+                activeShip.configOverrides?.player?.theme?.bulletPrimary ??
+                "#f9a8d4";
+
+          blockState.mode.bulletOffsets.forEach((offset, index) => {
+            const bullet = document.createElement("div");
+            bullet.className = "bullet";
+            bullet.style.left = `calc(50% + ${offset}px)`;
+            bullet.style.setProperty("--bullet-width", `${bulletWidth}px`);
+            bullet.style.setProperty("--bullet-height", `${bulletHeight}px`);
+            bullet.style.setProperty("--bullet-color", bulletColor);
+            bullet.style.setProperty("--bullet-duration", `${blockState.mode.bulletDuration}s`);
+            bullet.style.setProperty(
+              "--bullet-drift-x",
+              `${blockState.mode.bulletDrifts[index] ?? 0}px`
+            );
+            bullet.style.setProperty("--bullet-travel-y", `${travelY}px`);
+            bullet.addEventListener("animationend", () => {
+              bullet.remove();
+            });
+            blockState.bulletLayer.appendChild(bullet);
+          });
+        }
+
+        function startEmitters() {
+          blockStates.forEach((blockState) => {
+            spawnBullets(blockState);
+            blockState.emitterId = window.setInterval(() => {
+              spawnBullets(blockState);
+            }, 150);
+          });
+        }
+
+        function stopEmitters() {
+          blockStates.forEach((blockState) => {
+            if (blockState.emitterId) {
+              window.clearInterval(blockState.emitterId);
+              blockState.emitterId = 0;
+            }
+
+            if (blockState.bulletLayer) {
+              blockState.bulletLayer.replaceChildren();
+            }
+          });
+        }
+
+        function drawFlame(blockState, timeSeconds) {
+          if (!blockState?.ctx) {
+            return;
+          }
+
+          const flameConfig = activeShip?.fighterConfig?.tailFlame ?? {};
+          const previewFlame = getPreviewTailFlameConfig(flameConfig);
+          const theme = TAIL_FLAME_THEMES[flameConfig.theme] ?? TAIL_FLAME_THEMES.blue;
+          blockState.width = blockState.canvasWidth;
+          blockState.height = blockState.canvasHeight;
+          blockState.minLength = previewFlame.minLength;
+          blockState.maxLength = previewFlame.maxLength;
+          blockState.particles ??= [];
+          renderTailFlameFrame(blockState, theme, timeSeconds, 1 / 60);
+        }
+
+        function loop(time) {
+          if (!lastTime) {
+            lastTime = time;
+          }
+
+          const dt = Math.min(0.033, (time - lastTime) / 1000);
+          lastTime = time;
+          focusTimer += dt;
+
+          if (focusTimer >= 3) {
+            focusTimer = 0;
+            focusIndex = (focusIndex + 1) % demoModes.length;
+            syncModeLabel();
+          }
+
+          const seconds = time / 1000;
+          blockStates.forEach((blockState) => {
+            drawFlame(blockState, seconds);
+          });
+
+          rafId = window.requestAnimationFrame(loop);
+        }
+
+        return {
+          start(ship) {
+            this.stop();
+
+            activeShip = ship;
+            focusIndex = 0;
+            focusTimer = 0;
+            lastTime = 0;
+
+            blockStates = demoModes.map((mode) => ({
+              mode,
+              element: rootElement.querySelector(`#${mode.id}`),
+              seed: Math.random() * 1000
+            }));
+
+            blockStates.forEach((blockState) => {
+              buildModeBlock(blockState);
+            });
+
+            syncModeLabel();
+            startEmitters();
+            rafId = window.requestAnimationFrame(loop);
+          },
+          stop() {
+            if (rafId) {
+              window.cancelAnimationFrame(rafId);
+              rafId = 0;
+            }
+
+            stopEmitters();
+            blockStates.forEach((blockState) => {
+              if (blockState.ctx) {
+                blockState.ctx.clearRect(0, 0, blockState.canvasWidth ?? 0, blockState.canvasHeight ?? 0);
+              }
+              if (blockState.element) {
+                blockState.element.innerHTML = "";
+                blockState.element.classList.remove("is-active");
+              }
+            });
+          },
+          resize() {
+            blockStates.forEach((blockState) => {
+              resizeBlockCanvas(blockState);
+            });
+          }
+        };
+      }
+
+      const startScreen = document.getElementById("start-screen");
+      const selectScreen = document.getElementById("select-screen");
+      const detailScreen = document.getElementById("detail-screen");
+      const battleScreen = document.getElementById("battle-screen");
+      const selectTitle = document.getElementById("select-title");
+      const selectSubtitle = document.getElementById("select-subtitle");
+      const shipGrid = document.getElementById("ship-grid");
+      const battleShipLabel = document.getElementById("battle-ship-label");
+      const detailShipName = document.getElementById("detail-ship-name");
+      const detailBackButton = document.getElementById("detail-back-button");
+      const detailDeployButton = document.getElementById("detail-deploy-button");
+      const detailDemoStack = document.getElementById("detail-demo-stack");
+      const guideToggleButton = document.getElementById("guide-toggle-button");
+      const guideOverlay = document.getElementById("guide-overlay");
+      const guidePanel = document.getElementById("guide-panel");
+      const guidePage1 = document.getElementById("guide-page-1");
+      const guidePage2 = document.getElementById("guide-page-2");
+      const guideActionButton = document.getElementById("guide-action-button");
+      const guidePageIndicator = document.getElementById("guide-page-indicator");
+
+      const guidePages = [guidePage1, guidePage2];
+      const gameConfig = await loadGameConfig();
+      const fighterCards = gameConfig?.fighters ?? [];
+
+      shipGrid.innerHTML = fighterCards
+        .map((fighter) => {
+          const imageSrc = resolveFighterImageSource(fighter);
+
+          return `
+            <button
+              type="button"
+              data-ship="${fighter.id}"
+              class="ship-card flex flex-col items-center justify-center gap-4 p-4"
+            >
+              <div class="ship-card-inner">
+                <div class="ship-visual">
+                  <canvas class="ship-flame-canvas"></canvas>
+                  <img
+                    alt="${fighter.name}"
+                    class="ship-image h-16 w-16 object-contain sm:h-[4.5rem] sm:w-[4.5rem]"
+                    src="${imageSrc}"
+                  />
+                </div>
+                <span class="text-sm font-bold tracking-[0.3em] text-white">${fighter.name}</span>
+              </div>
+            </button>
+          `;
+        })
+        .join("");
+
+      const shipCards = Array.from(document.querySelectorAll("[data-ship]"));
+      initShipFlameAnimations(shipCards, fighterCards);
+      const fighterCardMap = new Map(fighterCards.map((fighter) => [fighter.id, fighter]));
+
+      const SHIPS = {
+        storm: {
+          id: "storm",
+          name: "风暴之矛",
+          battleLabel: "Storm Spear",
+          role: "Balanced Fighter",
+          code: "STRM-01",
+          className: "均衡",
+          callsign: "Vanguard Line",
+          description: "稳定机动，适合持续推进，拥有平衡的速度与火力节奏。",
+          weapon: "双脉冲炮",
+          tip: "持续压制",
+          mobility: 7,
+          firepower: 7,
+          shield: 6,
+          configOverrides: {
+            player: {
+              speed: 372,
+              autoFireInterval: 0.18,
+              pointerFollowLerp: 12,
+              theme: {
+                primary: "#38bdf8",
+                secondary: "#2563eb",
+                wing: "#dbeafe",
+                core: "rgba(255,255,255,0.92)",
+                glow: "rgba(56, 189, 248, 0.35)",
+                hud: "rgba(125, 211, 252, 0.42)",
+                hudText: "#93c5fd",
+                bossBar: "#fb7185",
+                bulletPrimary: "#fef08a",
+                bulletSecondary: "#f59e0b"
+              }
+            }
+          }
+        },
+        ember: {
+          id: "ember",
+          name: "赤焰突袭",
+          battleLabel: "Ember Strike",
+          role: "Assault Fighter",
+          code: "EMBR-02",
+          className: "强袭",
+          callsign: "Crimson Breach",
+          description: "更高射速与进攻压制力，适合追求爆发清场的打法。",
+          weapon: "烈焰速射炮",
+          tip: "快速歼灭",
+          mobility: 6,
+          firepower: 9,
+          shield: 5,
+          configOverrides: {
+            player: {
+              speed: 348,
+              autoFireInterval: 0.145,
+              pointerFollowLerp: 11,
+              theme: {
+                primary: "#fb7185",
+                secondary: "#f97316",
+                wing: "#ffe4e6",
+                core: "rgba(255,245,245,0.92)",
+                glow: "rgba(251, 113, 133, 0.35)",
+                hud: "rgba(251, 113, 133, 0.42)",
+                hudText: "#fda4af",
+                bossBar: "#fb7185",
+                bulletPrimary: "#fdba74",
+                bulletSecondary: "#fb7185"
+              }
+            }
+          }
+        },
+        nova: {
+          id: "nova",
+          name: "极光幻翼",
+          battleLabel: "Aurora Nova",
+          role: "Agile Fighter",
+          code: "NOVA-03",
+          className: "灵动",
+          callsign: "Phantom Vector",
+          description: "指针跟手更快，滑动感更灵敏，适合高机动规避操作。",
+          weapon: "棱镜穿梭炮",
+          tip: "闪避反击",
+          mobility: 9,
+          firepower: 6,
+          shield: 6,
+          configOverrides: {
+            player: {
+              speed: 388,
+              autoFireInterval: 0.19,
+              pointerFollowLerp: 16,
+              theme: {
+                primary: "#a78bfa",
+                secondary: "#8b5cf6",
+                wing: "#ede9fe",
+                core: "rgba(248,245,255,0.94)",
+                glow: "rgba(167, 139, 250, 0.35)",
+                hud: "rgba(167, 139, 250, 0.42)",
+                hudText: "#c4b5fd",
+                bossBar: "#fb7185",
+                bulletPrimary: "#ddd6fe",
+                bulletSecondary: "#a78bfa"
+              }
+            }
+          }
+        },
+        phantom: {
+          id: "phantom",
+          name: "影刃掠空",
+          battleLabel: "Phantom Glide",
+          role: "Stealth Fighter",
+          configOverrides: {
+            player: {
+              speed: 364,
+              autoFireInterval: 0.17,
+              pointerFollowLerp: 14,
+              theme: {
+                primary: "#93c5fd",
+                secondary: "#60a5fa",
+                wing: "#eff6ff",
+                core: "rgba(255,255,255,0.9)",
+                glow: "rgba(147, 197, 253, 0.32)",
+                hud: "rgba(147, 197, 253, 0.42)",
+                hudText: "#bfdbfe",
+                bossBar: "#fb7185",
+                bulletPrimary: "#e0f2fe",
+                bulletSecondary: "#93c5fd"
+              }
+            }
+          }
+        }
+      };
+
+      let selectedShip = null;
+      let hasBooted = false;
+      let currentGuidePage = 0;
+      let guideNextAction = "select";
+      const detailDemo = createDetailDemoController(
+        detailDemoStack,
+        null
+      );
+
+      function renderShipInfo(ship) {
+        if (battleShipLabel) {
+          battleShipLabel.textContent = ship?.battleLabel ?? "Awaiting Fighter";
+        }
+      }
+
+      function selectShip(shipId) {
+        selectedShip = SHIPS[shipId] ?? null;
+        shipCards.forEach((card) => {
+          card.classList.toggle("is-selected", card.dataset.ship === selectedShip?.id);
+        });
+        renderShipInfo(selectedShip);
+      }
+
+      function openDetailScreen(shipId) {
+        selectShip(shipId);
+        const fighter = fighterCardMap.get(selectedShip.id);
+
+        detailShipName.textContent = fighter?.name ?? selectedShip.name;
+
+        selectScreen.classList.add("hidden");
+        selectScreen.classList.remove("flex");
+        detailScreen.classList.remove("hidden");
+        detailScreen.classList.add("flex");
+
+        detailDemo.start({
+          ...selectedShip,
+          fighterConfig: fighter
+        });
+      }
+
+      function closeDetailScreen() {
+        detailDemo.stop();
+        detailScreen.classList.add("hidden");
+        detailScreen.classList.remove("flex");
+        selectScreen.classList.remove("hidden");
+        selectScreen.classList.add("flex");
+      }
+
+      function restartPageAnimations(pageElement) {
+        const animatedElements = pageElement.querySelectorAll(".guide-fade-in, .guide-row-enter");
+
+        animatedElements.forEach((element) => {
+          element.style.animation = "none";
+        });
+
+        void pageElement.offsetWidth;
+
+        animatedElements.forEach((element) => {
+          element.style.animation = "";
+        });
+      }
+
+      function renderGuidePage(pageIndex) {
+        currentGuidePage = pageIndex;
+
+        guidePages.forEach((page, index) => {
+          const isActive = index === pageIndex;
+          page.classList.toggle("is-active", isActive);
+          page.classList.toggle("is-inactive", !isActive);
+          if (isActive) {
+            restartPageAnimations(page);
+          }
+        });
+
+        guidePageIndicator.textContent = `${pageIndex + 1}/2`;
+        guideActionButton.textContent = pageIndex === 0 ? "下一页" : "开始作战";
+      }
+
+      function openGuideOverlay(pageIndex = 0) {
+        renderGuidePage(pageIndex);
+        guidePanel.style.animation = "none";
+        void guidePanel.offsetWidth;
+        guidePanel.style.animation = "";
+        guideOverlay.classList.add("is-active");
+        guideOverlay.classList.remove("invisible");
+      }
+
+      function closeGuideOverlay() {
+        guideOverlay.classList.remove("is-active");
+        window.setTimeout(() => {
+          if (!guideOverlay.classList.contains("is-active")) {
+            guideOverlay.classList.add("invisible");
+          }
+        }, 300);
+      }
+
+      function showSelectScreen() {
+        startScreen.classList.add("hidden");
+        revealSelectScreen();
+      }
+
+      function revealSelectScreen() {
+        selectScreen.classList.remove("hidden");
+        selectScreen.classList.add("flex");
+      }
+
+      async function deploySelectedShip() {
+        const fighter = selectedShip ? fighterCardMap.get(selectedShip.id) : null;
+        if (!selectedShip || !fighter) {
+          return;
+        }
+
+        detailDemo.stop();
+        detailScreen.classList.add("hidden");
+        detailScreen.classList.remove("flex");
+        selectScreen.classList.add("hidden");
+        selectScreen.classList.remove("flex");
+        battleScreen.classList.remove("hidden");
+
+        const bulletImage = resolveFighterBulletSource(fighter);
+        const fighterImage = resolveFighterImageSource(fighter);
+        const battleConfigOverrides = {
+          ...selectedShip.configOverrides,
+          player: {
+            ...(selectedShip.configOverrides?.player ?? {}),
+            attackModes: fighter?.attackModes ?? [],
+            maxHealth: Math.max(3, selectedShip.shield ?? 6),
+            image: fighterImage,
+            tailFlame: fighter?.tailFlame ?? null
+          },
+          bullet: {
+            ...(selectedShip.configOverrides?.bullet ?? {}),
+            ...(fighter?.bullet ?? {}),
+            image: bulletImage || fighter?.bullet?.image || ""
+          }
+        };
+
+        if (hasBooted) {
+          return;
+        }
+
+        hasBooted = true;
+        await bootstrap({
+          root: document.getElementById("app"),
+          configOverrides: battleConfigOverrides
+        });
+      }
+
+      startScreen.addEventListener("click", showSelectScreen, { once: true });
+
+      shipCards.forEach((card) => {
+        card.addEventListener("click", () => {
+          const shipId = card.dataset.ship;
+          openDetailScreen(shipId);
+        });
+      });
+      detailBackButton.addEventListener("click", closeDetailScreen);
+      detailDeployButton.addEventListener("click", deploySelectedShip);
+      guideToggleButton?.addEventListener("click", () => {
+        guideNextAction = "close";
+        openGuideOverlay(currentGuidePage);
+      });
+      guideActionButton.addEventListener("click", () => {
+        if (currentGuidePage === 0) {
+          renderGuidePage(1);
+          return;
+        }
+
+        closeGuideOverlay();
+        if (guideNextAction === "select") {
+          revealSelectScreen();
+          return;
+        }
+
+        console.log("close guide overlay");
+      });
+
+      renderShipInfo(selectedShip);
+      renderGuidePage(0);
+      window.addEventListener("resize", () => {
+        detailDemo.resize();
+      });
+    </script>
+  </body>
+</html>
